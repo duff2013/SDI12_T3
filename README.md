@@ -36,7 +36,7 @@ Connect the sensor to teensy using external Vin for sensor power.<br>
  ----------------                                           -------------  
 | Serial Port TX |<------------[10K Resistor]------------->|    Data     |
 |       GND      |--------|                    |-----------|    GND      |
-|       Vin      |        |                    | |-------->|    Power    |
+|       Vin      |X       |                    | |-------->|    Power    |
  ----------------         |    External Power  | |          -------------
                           |      -------       | |
                           |---->| GND   |<-----| |
@@ -46,14 +46,65 @@ Connect the sensor to teensy using external Vin for sensor power.<br>
  ----------------                                           -------------  
 | Serial Port TX |<--------------------------------------->|    Data     |
 |       GND      |--------|                    |-----------|    GND      |
-|       Vin      |        |                    | |-------->|    Power    |
+|       Vin      |X       |                    | |-------->|    Power    |
  ----------------         |    External Power  | |          -------------
                           |      -------       | |
                           |---->| GND   |<-----| |
                                 | Power |--------|
                                  -------
-                           
 ```
 
+<h4>Usage:</h4><br>
+<b>Functions:</b>
+```c
+bool isActive( int address = -1 );
 
+```
+```c
+bool identification( const char *src ) { identification( (const uint8_t *)src ); }
+bool identification( const uint8_t *src );
+
+```
+```c
+int queryAddress( void );
+
+```
+```c
+int changeAddress( uint8_t new_address );
+
+```
+```c
+bool verification( const char *src ) { verification( (const uint8_t *)src ); }
+bool verification( const uint8_t *src );
+
+```
+```c
+bool measurement( int num = -1 ) { uint8_t s[75]; measurement( s, num ); }
+bool measurement( const char *src, int num = -1 ) { measurement( (const uint8_t *)src, num ); }
+bool measurement( const uint8_t *src, int num = -1 );
+
+```
+```c
+bool concurrent( int num = -1 ) { uint8_t s[75]; concurrent( s, num ); }
+bool concurrent( const char *src, int num = -1 ) { concurrent( (const uint8_t *)src, num ); }
+bool concurrent(  const uint8_t *src, int num  );
+
+```
+```c
+bool continuous( const char *src, int num = -1 ) { continuous( (const uint8_t *)src, num ); }
+bool continuous( const uint8_t *src, int num = -1 );
+
+```
+```c
+bool returnMeasurement( const char *src, int num = -1 ) { returnMeasurement( (const uint8_t *)src, num ); }
+bool returnMeasurement( const uint8_t *src, int num = -1 );
+
+```
+```c
+bool transparent( const char *command, const uint8_t *src ) { transparent( (uint8_t*)command, src ); }
+bool transparent( const uint8_t *command, const char *src ) { transparent( command, (uint8_t*)src ); }
+bool transparent( const char *command, const char *src ) { transparent( (uint8_t*)command, (uint8_t*)src ); }
+bool transparent( const uint8_t *command, const uint8_t *src );
+
+```
 [SDI12 Specification]:http://www.sdi-12.org/current%20specification/SDI-12_version1_3%20January%2026,%202013.pdf
