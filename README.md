@@ -87,17 +87,17 @@ bool isActive( int address = -1 );
 Example:
 ```c
 // Check if sensor is active using address defined in constructor. 
-SDI12 DECAGON_5TE_10CM.isActive( );
+DECAGON_5TE_10CM.isActive( );
 // Check if sensor is active using address defined in constructor. 
-SDI12 DECAGON_5TE_20CM.isActive( );
+DECAGON_5TE_20CM.isActive( );
 // Check if sensor is active using address defined in constructor. 
-SDI12 DECAGON_5TE_30CM.isActive( );
+DECAGON_5TE_30CM.isActive( );
 // Check if sensor is active using address defined in constructor. 
-SDI12 DECAGON_5TE_40CM.isActive( );
+DECAGON_5TE_40CM.isActive( );
 // Check if sensor is active using different address than defined 
 // in constructor. This allows us to see if it is actually a 
 // different address.
-SDI12 DECAGON_5TE_40CM.isActive('5');
+DECAGON_5TE_40CM.isActive('5');
 ```
 
 <br><b>identification:</b>
