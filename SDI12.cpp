@@ -110,7 +110,7 @@ SDI12::SDI12( Stream *port, char address, bool crc ) {
     for (int i = 0; i < 60; i++) {
         activeAddress[i] = false;
     }
-    dd
+
     int ascii_numbers    = (address < 0x30) || (address > 0x39);
     int ascii_upper_case = (address < 0x41) || (address > 0x5A);
     int ascii_lower_case = (address < 0x61) || (address > 0x7A);
@@ -393,7 +393,7 @@ bool SDI12::measurement( const uint8_t *src, int num ) {
 bool SDI12::concurrent( const uint8_t *src, int num ) {
     bool error;
     uint8_t *s = ( uint8_t * )src;
-    activeAddresses[sensor.address] = true;
+    activeAddress[sensor.address] = true;
     uint8_t command[5];
     command[0] = sensor.address;
     command[1] = 'C';
