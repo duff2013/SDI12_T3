@@ -1,0 +1,29 @@
+#######################################
+# Syntax Coloring Map SDI12
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+SDI12	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+isActive	KEYWORD2
+identification	KEYWORD2
+changeAddress	KEYWORD2
+queryAddress	KEYWORD2
+verification	KEYWORD2
+measurement	KEYWORD2
+concurrent	KEYWORD2
+continuous	KEYWORD2
+returnMeasurement	KEYWORD2
+#######################################
+# Instances (KEYWORD2)
+#######################################
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
