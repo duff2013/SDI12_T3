@@ -1,6 +1,6 @@
 /*
  ||
- || @file 		SDI12.h
+ || @file 	SDI12.h
  || @version 	1
  || @author 	Colin Duffy
  || @contact 	cmduffy@engr.psu.edu
@@ -53,11 +53,11 @@ public:
     }
 private:
     int  peek      ( void );
-	int  read      ( void );
-	int  available ( void );
+    int  read      ( void );
+    int  available ( void );
     int  end       ( void );
     void clear     ( void );
-	void flush     ( void );
+    void flush     ( void );
     
     friend class      SDI12;
     KINETISK_UART_t   *REG;
