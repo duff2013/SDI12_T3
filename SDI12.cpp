@@ -97,11 +97,11 @@ SDI12  *SDI12::STATIC;
 SDI12  *SDI12::TMP[];
 
 SDI12::SDI12( Stream *port, char address, bool crc ) {
-    pinMode(13, OUTPUT);
+    /*pinMode(13, OUTPUT);
     pinMode(17, OUTPUT);
     pinMode(18, OUTPUT);
     pinMode(19, OUTPUT);
-    pinMode(20, OUTPUT);
+    pinMode(20, OUTPUT);*/
     
     sensor.uart = port;
     sensor.address = address;
