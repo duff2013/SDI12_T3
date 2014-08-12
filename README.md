@@ -75,7 +75,7 @@ SDI12 DECAGON_5TE_30CM(&Serial3, '3', true);
 SDI12 DECAGON_5TE_40CM(&Serial3, '4', true);
 ```
 <br>
-<h3>-------------------------------------Functions----------------------------------</h3>
+<h3>--------------------------Functions-------------------------------</h3>
 
 <b>isActive:</b>
 ```c
@@ -86,18 +86,24 @@ bool isActive( int address = -1 );
 
 Example:
 ```c
+int error;
 // Check if sensor is active using address defined in constructor. 
-DECAGON_5TE_10CM.isActive( );
+error = DECAGON_5TE_10CM.isActive( );
+if(error) Serial.println("Sensor at address 1 Not Active");
 // Check if sensor is active using address defined in constructor. 
-DECAGON_5TE_20CM.isActive( );
+error = DECAGON_5TE_20CM.isActive( );
+if(error) Serial.println("Sensor at address 2 Not Active");
 // Check if sensor is active using address defined in constructor. 
-DECAGON_5TE_30CM.isActive( );
+error = DECAGON_5TE_30CM.isActive( );
+if(error) Serial.println("Sensor at address 3 Not Active");
 // Check if sensor is active using address defined in constructor. 
-DECAGON_5TE_40CM.isActive( );
+error = DECAGON_5TE_40CM.isActive( );
+if(error) Serial.println("Sensor at address 4 Not Active");
 // Check if sensor is active using different address than defined 
 // in constructor. This allows us to see if it is actually a 
 // different address.
-DECAGON_5TE_40CM.isActive('5');
+error = DECAGON_5TE_40CM.isActive('5');
+if(error) Serial.println("Sensor at address 5 Not Active");
 ```
 
 <br><b>identification:</b>
@@ -109,22 +115,27 @@ bool identification( const uint8_t *src );
 ```
 <br><b>queryAddress:</b>
 ```c
+// SDI12 (Address Query) "?!" command.
 int queryAddress( void );
 
 ```
 <br><b>changeAddress:</b>
 ```c
+// SDI12 (Change Address) "aAb!" command.
 int changeAddress( uint8_t new_address );
 
 ```
 <br><b>verification:</b>
 ```c
+// SDI12 (Start Verification) "aV!" command.
 bool verification( const char *src ) { verification( (const uint8_t *)src ); }
 bool verification( const uint8_t *src );
 
 ```
 <br><b>measurement:</b>
 ```c
+// SDI12 (Start Measurement) command.
+// "aM!", "aMC!" or "aM0...aM9" or "aMC0...aMC9"
 bool measurement( int num = -1 ) { uint8_t s[75]; measurement( s, num ); }
 bool measurement( const char *src, int num = -1 ) { measurement( (const uint8_t *)src, num ); }
 bool measurement( const uint8_t *src, int num = -1 );
@@ -132,6 +143,8 @@ bool measurement( const uint8_t *src, int num = -1 );
 ```
 <br><b>concurrent:</b>
 ```c
+// SDI12 (Start Concurrent Measurement) command.
+// "aC!","aCC!" or "aC0...aC9" or "aCC0...aCC9"
 bool concurrent( int num = -1 ) { uint8_t s[75]; concurrent( s, num ); }
 bool concurrent( const char *src, int num = -1 ) { concurrent( (const uint8_t *)src, num ); }
 bool concurrent(  const uint8_t *src, int num  );
@@ -139,18 +152,23 @@ bool concurrent(  const uint8_t *src, int num  );
 ```
 <br><b>continuous:</b>
 ```c
+// SDI12 (Start Continuous Measurement) command.
+// "aR0!...aR9!" or "aRC0!...aRC9!"
 bool continuous( const char *src, int num = -1 ) { continuous( (const uint8_t *)src, num ); }
 bool continuous( const uint8_t *src, int num = -1 );
 
 ```
 <br><b>returnMeasurement:</b>
 ```c
+// SDI12 (Return Measurement) command.
+// "aD!" or "aD0!...aD9!"
 bool returnMeasurement( const char *src, int num = -1 ) { returnMeasurement( (const uint8_t *)src, num ); }
 bool returnMeasurement( const uint8_t *src, int num = -1 );
 
 ```
 <br><b>transparent:</b>
 ```c
+// SDI12 (Transparent) command. Allows extended SDI12 commands.
 bool transparent( const char *command, const uint8_t *src ) { transparent( (uint8_t*)command, src ); }
 bool transparent( const uint8_t *command, const char *src ) { transparent( command, (uint8_t*)src ); }
 bool transparent( const char *command, const char *src ) { transparent( (uint8_t*)command, (uint8_t*)src ); }
