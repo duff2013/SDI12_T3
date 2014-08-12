@@ -20,14 +20,14 @@ Connect the sensor to teensy using Teensy's Vin (5V) for sensor power.<br>
  -------------                                           -------------  
 | Serial Port |<------------[10K Resistor]------------->|    Data     |
 |     GND     |<----------------------------------------|    GND      |
-|    Power    |<----------------------------------------|    Power    |
+|     Vin     |---------------------------------------->|    Power    |
  -------------                                           -------------
  
    Teensy 3.1                                                Sensor
  -------------                                           -------------  
 | Serial Port |<--------------------------------------->|    Data     |
 |     GND     |<----------------------------------------|    GND      |
-|    Power    |<----------------------------------------|    Power    |
+|     Vin     |---------------------------------------->|    Power    |
  -------------                                           -------------
 ```
 Connect the sensor to teensy using external Vin for sensor power.<br>
@@ -36,22 +36,24 @@ Connect the sensor to teensy using external Vin for sensor power.<br>
  -------------                                           -------------  
 | Serial Port |<------------[10K Resistor]------------->|    Data     |
 |     GND     |--------|                    |-----------|    GND      |
-|    Power    |        |                    | |---------|    Power    |
+|     Vin     |        |                    | |-------->|    Power    |
  -------------         |    External Power  | |          -------------
                        |      -------       | |
                        |---->| GND   |<-----| |
-                             | Power |<-------|
+                             | Power |--------|
                               -------
   Teensy 3.1                                                Sensor
  -------------                                           -------------  
 | Serial Port |<--------------------------------------->|    Data     |
 |     GND     |--------|                    |-----------|    GND      |
-|    Power    |        |                    | |---------|    Power    |
+|     Vin     |        |                    | |-------->|    Power    |
  -------------         |    External Power  | |          -------------
                        |      -------       | |
                        |---->| GND   |<-----| |
-                             | Power |<-------|
+                             | Power |--------|
                               -------
                            
 ```
+
+
 [SDI12 Specification]:http://www.sdi-12.org/current%20specification/SDI-12_version1_3%20January%2026,%202013.pdf
