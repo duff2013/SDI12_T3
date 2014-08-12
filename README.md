@@ -10,11 +10,12 @@ SDI12
 
 
 <b>Hookup</b>
-> Teensy 3.0 are not 5V tolerant, put a resistor inlined with the data line.
-> Teensy 3.1 is 5V tolerant so direct connection can be done.
-> While SDI12 specification states 12V is used for power many sensors use a range of values (5-17V).
-> Below is typically how you would connect the sensor to teensy.
+>1. Teensy 3.0 are not 5V tolerant, put a resistor inlined with the data line.<br>
+>2. Teensy 3.1 is 5V tolerant so direct connection can be done.<br>
+>3. While SDI12 specification states 12V is used for power many sensors use a range of values (5-17V).<br>
 
-<b>Teensy 3.0</b><br>
+Below is typically how you would connect the sensor to teensy.<br>
 
-<b>Teensy TX(1,2,3)</b><----------==10K Resistor==----------><b>Sensor Data Line</b><br>
+
+
+<b>[Teensy 3.0 Serial 1,2,3]</b><----------==<b>[10K Resistor]</b>==----------><b>[Sensor Data Line]</b><br>
