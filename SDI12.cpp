@@ -585,11 +585,9 @@ void SDI12::io_break( void ) {
 }
 
 void SDI12::io_mark( void ) {
-    //ioTimer.end( );
+    ioTimer.end( );
     ioTimer.begin( concurrentHandle, 8333 );
     if ( !ioActive ) STATIC->REG->C2 = C2_TX_ACTIVE;
-    
-    digitalWrite(13, HIGH);
 }
 
 void SDI12::concurrentHandle( void ) {
