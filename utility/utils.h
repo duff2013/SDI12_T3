@@ -35,8 +35,6 @@
 #define SCGC4_UART1_BIT     11
 #define SCGC4_UART2_BIT     12
 
-#define UART_DMA_ENABLE     UART_C5_TDMAS | UART_C5_RDMAS
-#define UART_DMA_DISABLE    0
 #define IRQ_PRIORITY        64  // 0 = highest priority, 255 = lowest
 
 #define UART_C3_TXDIR       (uint8_t)0x20
@@ -46,9 +44,6 @@
 #define UART_C3_PEIE        (uint8_t)0x01
 
 #define UART_S2_RXINV       (uint8_t)0x10
-
-#define UART_C5_TDMAS       (uint8_t)0x80
-#define UART_C5_RDMAS       (uint8_t)0x20
 
 #define C2_ENABLE           UART_C2_TE | UART_C2_RE | UART_C2_RIE
 #define C2_TX_ACTIVE		C2_ENABLE | UART_C2_TIE

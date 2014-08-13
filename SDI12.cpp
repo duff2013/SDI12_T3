@@ -702,7 +702,7 @@ void uart0_isr( void ) {
     
     if ((c & UART_C2_TCIE) && (UART0_S1 & UART_S1_TC)) {
         UART0_C2 = C2_TX_INACTIVE;
-        UART0_C3 &= ~UART_C3_TXDIR;
+        UART0_C3 &= UART_TX_DIR_IN;
         transmitting = false;
     }
 }
@@ -740,7 +740,7 @@ void uart1_isr( void ) {
     
     if ((c & UART_C2_TCIE) && (UART1_S1 & UART_S1_TC)) {
         UART1_C2 = C2_TX_INACTIVE;
-        UART1_C3 &= ~UART_C3_TXDIR;
+        UART1_C3 &= UART_TX_DIR_IN;
         transmitting = false;
     }
 }
