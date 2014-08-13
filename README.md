@@ -233,7 +233,7 @@ bool measurement( int num = -1 ) { uint8_t s[75]; measurement( s, num ); }
 bool measurement( const char *src, int num = -1 ) { measurement( (const uint8_t *)src, num ); }
 bool measurement( const uint8_t *src, int num = -1 );
 ```
->1. ```const (char or uint8_t) *src``` = buffer array you supply to hold returned string.
+>1. ```const (char or uint8_t) *src``` = buffer array you supply to hold acknowledgement string.
 >2. ```int num = -1```(optional) = Additional measurements.
 
 Example:
@@ -296,7 +296,7 @@ bool concurrent( int num = -1 ) { uint8_t s[75]; concurrent( s, num ); }
 bool concurrent( const char *src, int num = -1 ) { concurrent( (const uint8_t *)src, num ); }
 bool concurrent(  const uint8_t *src, int num  );
 ```
->1. ```const (char or uint8_t) *src``` = buffer array you supply to hold returned string.
+>1. ```const (char or uint8_t) *src``` = buffer array you supply to hold acknowledgement string.
 >2. ```int num = -1```(optional) = Additional measurements.
 
 Example:
