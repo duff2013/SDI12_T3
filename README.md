@@ -9,10 +9,10 @@ SDI12
 > SDI12 is a single wire serial protocol that uses inverted 5V logic levels, specifically (1200 baud, 7E1) for bi-directional data flow with one Master and many Slaves. This library sets up the Freescale Cortex one-wire protocol for each of its 3 Hardware Serial ports TX line along with critical timing - Break and Mark signals to wake the sensor bus. This makes effectivaly 3 seperate SDI12 buses that can be used or not. Since SDI12 is Master-Slave, many different types of sensor can share the same bus through the use of unique address for each senor.
 
 <b>Sensor Tested:</b>
->1. Decagon 5TE
->2. Decagon CTD
->3. Keller DigiLevel
->4. Vaisala WXT520
+>1. [Decagon 5TE]
+>2. [Decagon CTD]
+>3. [Keller DigiLevel]
+>4. [Vaisala WXT520]
 
 <b>Hookup</b>
 >1. Teensy 3.0 are not 5V tolerant, put a resistor inlined with the data line.<br>
@@ -307,3 +307,7 @@ bool transparent( const uint8_t *command, const uint8_t *src );
 
 ```
 [SDI12 Specification]:http://www.sdi-12.org/current%20specification/SDI-12_version1_3%20January%2026,%202013.pdf
+[Vaisala WXT520]:http://www.vaisala.com/en/products/multiweathersensors/Pages/WXT520.aspx
+[Decagon 5TE]:http://www.decagon.com/products/soils/volumetric-water-content-sensors/5te-vwc-ec-temp/
+[Decagon CTD]:http://www.decagon.com/products/hydrology/water-level-temperature-electrical-conductivity/ctd-5-10-sensor-electrical-conductivity-temperature-depth/
+[Keller DigiLevel]:http://www.kelleramerica.com/blog/?tag=digilevel
