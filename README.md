@@ -9,8 +9,8 @@ SDI12
 > SDI12 is a single wire serial protocol that uses inverted 5V logic levels, specifically (1200 baud, 7E1) for bi-directional data flow with one Master and many Slaves. This library sets up the Freescale Cortex one-wire protocol for each of its 3 Hardware Serial ports TX pin along with critical timing - Break and Mark signals to wake the sensor bus. This makes effectivaly 3 seperate SDI12 buses that can be used or not. Since SDI12 is Master-Slave, many different types of sensor can share the same bus through the use of unique address for each senor.
 
 <br>
-Since Teensy are 3.3V micrcontrollers it is actually out of SDI12 specification:
-1. Spacing (3.5V to 5V).
+Since Teensy are 3.3V micrcontrollers it is actually out of SDI12 specification:<br>
+1. Spacing (3.5V to 5V)<br>
 2. Marking (-0.5V to 1V)<br>
 
 Though all the sensors listed below will still work with 3.3V signals. I'm working on proper level shifting to be in spec.
@@ -68,6 +68,7 @@ Connect the sensor to teensy using external Vin for sensor power.<br>
 
 <h2>Usage</h2><br>
 <b>Constructor:</b>
+---
 ```c
 SDI12( Stream *port, char address, bool crc = false ) ;
 ```
