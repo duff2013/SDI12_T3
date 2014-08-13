@@ -3,10 +3,10 @@ SDI12
 
 <h3>Teensy 3.x SDI12 Library V1</h3>
 
-<h4>This library implements the SDI12 v1.3 protocol, nativaly using Teensy's hardware serial one-wire protocol.</h4>
+<h4>This library implements the SDI12 v1.3 protocol, natively using Teensy's hardware serial one-wire protocol.</h4>
 
 <b>[SDI12 Specification]</b>
-> SDI12 is a single wire serial protocol that uses inverted 5V logic levels, specifically (1200 baud, 7E1) for bi-directional data flow with one Master and many Slaves. This library sets up the Freescale Cortex one-wire protocol for each of its 3 Hardware Serial ports TX pin along with critical timing - Break and Mark signals to wake the sensor bus. This makes effectivaly 3 seperate SDI12 buses that can be used or not. Since SDI12 is Master-Slave, many different types of sensor can share the same bus through the use of unique address for each senor.
+> SDI12 is a single wire serial protocol that uses inverted 5V logic levels, specifically (1200 baud, 7E1) for bi-directional data flow with one Master and many Slaves. This library sets up the Freescale Cortex one-wire protocol for each of its 3 Hardware Serial ports TX pin along with critical timing - Break and Mark signals to wake the sensor bus. This makes effectively 3 separate SDI12 buses that can be used or not. Since SDI12 is Master-Slave, many different types of sensor can share the same bus through the use of unique address for each sensor.
 
 <br>
 Since Teensy are 3.3V micrcontrollers it is actually out of SDI12 specification:<br>
@@ -128,7 +128,7 @@ if( error ) Serial.println( "Sensor at address 5 Not Active" );
 <br><b>identification:</b>
 ---
 ```c
-// SDI12 (Send Indentification) "aI!" command.
+// SDI12 (Send Identification) "aI!" command.
 bool identification( const char *src ) { identification( (const uint8_t *)src ); }
 bool identification( const uint8_t *src );
 ```
@@ -212,7 +212,7 @@ Example:
 int error;
 // Buffer to hold returned string.
 char buf[35];
-// Opionally can get debug info on command return
+// Optionally can get debug info on command return
 char debug[10];
 
 error = DECAGON_5TE_10CM.verification( debug );
@@ -234,12 +234,12 @@ bool measurement( const char *src, int num = -1 ) { measurement( (const uint8_t 
 bool measurement( const uint8_t *src, int num = -1 );
 ```
 >1. ```const (char or uint8_t) *src``` = buffer array you supply to hold returned string.
->2. ```int num = -1```(optional) = Additional measuremnts.
+>2. ```int num = -1```(optional) = Additional measurements.
 
 Example:
 ```c
 int error;
-// buffer to hold sensor measurement acknowldegement string.
+// buffer to hold sensor measurement acknowledgment string.
 char debug[10];
 // Max return sensor string size is 81 characters.
 char data[81];
@@ -297,7 +297,7 @@ bool concurrent( const char *src, int num = -1 ) { concurrent( (const uint8_t *)
 bool concurrent(  const uint8_t *src, int num  );
 ```
 >1. ```const (char or uint8_t) *src``` = buffer array you supply to hold returned string.
->2. ```int num = -1```(optional) = Additional measuremnts.
+>2. ```int num = -1```(optional) = Additional measurements.
 
 Example:
 ```c
@@ -305,7 +305,7 @@ Example:
 /* 
  * This function will provide a non blocking way to read sensors.
  * This will be the function used in "Background Mode" where 
- * sensors can be logged autmatically.
+ * sensors can be logged automatically.
  */
 ```
 
@@ -318,7 +318,7 @@ bool continuous( const char *src, int num = -1 ) { continuous( (const uint8_t *)
 bool continuous( const uint8_t *src, int num = -1 );
 ```
 >1. ```const (char or uint8_t) *src``` = buffer array you supply to hold returned string.
->2. ```int num = -1```(optional) = Additional measuremnts.
+>2. ```int num = -1```(optional) = Additional measurements.
 
 Example:
 ```c
@@ -346,7 +346,7 @@ bool returnMeasurement( const char *src, int num = -1 ) { returnMeasurement( (co
 bool returnMeasurement( const uint8_t *src, int num = -1 );
 ```
 >1. ```const (char or uint8_t) *src``` = buffer array you supply to hold returned string.
->2. ```int num = -1```(optional) = Additional measuremnts.
+>2. ```int num = -1```(optional) = Additional measurements.
 
 Example:
 ```c
@@ -377,7 +377,7 @@ char cmd[3] = "2I!";
 char data[81];
 
 memset( data, 0, 81 );
-// Function to tell sensor to send a tranparent command.
+// Function to tell sensor to send a transparent command.
 // If using 'M' command it will handle sensor acknowledgement also.
 error = DECAGON_5TE_10CM.transparent( cmd, data );
 if ( !error ) Serial.print( data );
