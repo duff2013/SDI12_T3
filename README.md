@@ -3,16 +3,21 @@ SDI12
 
 <h3>Teensy 3.x SDI12 Library V1</h3>
 
-<h4>This library implements the SDI12 v1.3 hardware serial protocol nativaly using the special one-wire serial protocol.</h4>
+<h4>This library implements the SDI12 v1.3 protocol, nativaly using Teensy's hardware serial one-wire protocol.</h4>
 
 <b>[SDI12 Specification]</b>
-> SDI12 is a single wire serial protocol that uses inverted 5V logic levels, specifically (1200 baud, 7E1) for bi-directional data flow with one Master and many Slaves. This library sets up the Freescale Cortex one-wire protocol for each of its 3 Hardware Serial ports TX line along with timing critical Break and Mark signals to wake the sensor bus. This makes effectivaly 3 seperate SDI12 buses that can be used or not. Since SDI12 is Master-Slave, many different types of sensor can share the same bus through the use of unique address for each senor.
+> SDI12 is a single wire serial protocol that uses inverted 5V logic levels, specifically (1200 baud, 7E1) for bi-directional data flow with one Master and many Slaves. This library sets up the Freescale Cortex one-wire protocol for each of its 3 Hardware Serial ports TX line along with critical timing - Break and Mark signals to wake the sensor bus. This makes effectivaly 3 seperate SDI12 buses that can be used or not. Since SDI12 is Master-Slave, many different types of sensor can share the same bus through the use of unique address for each senor.
 
+<b>Sensor Tested:</b>
+>1. Decagon 5TE
+>2. Decagon CTD
+>3. Keller DigiLevel
+>4. Vaisala WXT520
 
 <b>Hookup</b>
 >1. Teensy 3.0 are not 5V tolerant, put a resistor inlined with the data line.<br>
 >2. Teensy 3.1 is 5V tolerant so direct connection can be done.<br>
->3. While SDI12 specification states 12V is used for power many sensors use a range of values (5-17V).<br>
+>3. While SDI12 specification states 12V is used for power, many sensors use a range of values (5-17V).<br>
 
 Connect the sensor to teensy using Teensy's Vin (5V) for sensor power.<br>
 ```
@@ -59,9 +64,9 @@ Connect the sensor to teensy using external Vin for sensor power.<br>
 ```c
 SDI12( Stream *port, char address, bool crc = false ) ;
 ```
-1. ```Stream *port``` = One of the Hardware Serial Ports.
-2. ```char address``` = Sensor Address, must be preprogramed.
-3. ```bool crc```(optional) = Set 'true' to append CRC to sensor data.
+>1. ```Stream *port``` = One of the Hardware Serial Ports.
+>2. ```char address``` = Sensor Address, must be preprogramed.
+>3. ```bool crc```(optional) = Set 'true' to append CRC to sensor data.
 
 Example:
 ```c
@@ -69,10 +74,10 @@ Example:
 // Serial Port can either be Serial1, Serial2, Serial3.
 // Address have to be ascii values. (0-10),(a-z),(A-Z).
 // CRC will be appended to returned data packet for each sensor.
-SDI12 DECAGON_5TE_10CM(&Serial3, '1', true);
-SDI12 DECAGON_5TE_20CM(&Serial3, '2', true);
-SDI12 DECAGON_5TE_30CM(&Serial3, '3', true);
-SDI12 DECAGON_5TE_40CM(&Serial3, '4', true);
+SDI12 DECAGON_5TE_10CM( &Serial3, '1', true );
+SDI12 DECAGON_5TE_20CM( &Serial3, '2', true );
+SDI12 DECAGON_5TE_30CM( &Serial3, '3', true );
+SDI12 DECAGON_5TE_40CM( &Serial3, '4', true );
 ```
 <br>
 <h3>--------------------------Functions-------------------------------</h3>
@@ -82,28 +87,33 @@ SDI12 DECAGON_5TE_40CM(&Serial3, '4', true);
 //SDI12 (Acknowledge Active) "a!" command.
 bool isActive( int address = -1 );
 ```
-1. ```int address```(optional) = can use other address also.
+>1. ```int address```(optional) = can use other address also.
 
 Example:
 ```c
 int error;
+
 // Check if sensor is active using address defined in constructor. 
 error = DECAGON_5TE_10CM.isActive( );
-if(error) Serial.println("Sensor at address 1 Not Active");
+if( error ) Serial.println( "Sensor at address 1 Not Active" );
+
 // Check if sensor is active using address defined in constructor. 
 error = DECAGON_5TE_20CM.isActive( );
-if(error) Serial.println("Sensor at address 2 Not Active");
+if( error ) Serial.println( "Sensor at address 2 Not Active" );
+
 // Check if sensor is active using address defined in constructor. 
 error = DECAGON_5TE_30CM.isActive( );
-if(error) Serial.println("Sensor at address 3 Not Active");
+if( error ) Serial.println( "Sensor at address 3 Not Active" );
+
 // Check if sensor is active using address defined in constructor. 
 error = DECAGON_5TE_40CM.isActive( );
-if(error) Serial.println("Sensor at address 4 Not Active");
+if( error ) Serial.println( "Sensor at address 4 Not Active" );
+
 // Check if sensor is active using different address than defined 
 // in constructor. This allows us to see if it is actually a 
 // different address.
-error = DECAGON_5TE_40CM.isActive('5');
-if(error) Serial.println("Sensor at address 5 Not Active");
+error = DECAGON_5TE_40CM.isActive( '5' );
+if( error ) Serial.println( "Sensor at address 5 Not Active" );
 ```
 
 <br><b>identification:</b>
@@ -111,27 +121,96 @@ if(error) Serial.println("Sensor at address 5 Not Active");
 // SDI12 (Send Indentification) "aI!" command.
 bool identification( const char *src ) { identification( (const uint8_t *)src ); }
 bool identification( const uint8_t *src );
+```
+>1. ```const (char or uint8_t) *src``` = buffer array you supply to hold returned string.
 
+Example:
+```c
+int error;
+// Max size of return string is 35 character.
+char buf[35]
+
+// If no error then print id string. 
+error = DECAGON_5TE_10CM.identification( buf );
+if( !error ) Serial.println( buf );
+
+// If no error then print id string. 
+error = DECAGON_5TE_20CM.identification( buf );
+if( !error ) Serial.println( buf );
+
+// If no error then print id string.
+error = DECAGON_5TE_30CM.identification( buf );
+if( !error ) Serial.println( buf );
+
+// If no error then print id string.
+error = DECAGON_5TE_40CM.identification( buf );
+if( !error ) Serial.println( buf );
 ```
 <br><b>queryAddress:</b>
 ```c
 // SDI12 (Address Query) "?!" command.
+/*** Only ONE sensor can on the bus when using this command! ***/
 int queryAddress( void );
-
 ```
+Example:
+```c
+int address;
+
+// Used to see what your sensor address actually is.
+// Only one sensor can be connected to bus at a time. 
+address = DECAGON_5TE_10CM.queryAddress( );
+if(address != -1) {
+    Serial.print( "Sensor Address is " );
+    Serial.println( (char)address )
+}
+```
+
 <br><b>changeAddress:</b>
 ```c
 // SDI12 (Change Address) "aAb!" command.
 int changeAddress( uint8_t new_address );
+```
+>1. ```uint8_t new_address``` = address you want to change to.
 
+Example:
+```c
+int address;
+
+// Change address defined in the constructor '1' to '5'.
+// This address will be updated for any future use of this function.
+address = DECAGON_5TE_10CM.changeAddress( '5' );
+if( address != -1 ) {
+    Serial.print( "New Address is" );
+    Serial.println( (char)address );
+} else {
+    Serial.println( "Address out of range or command failed" );
+}
 ```
 <br><b>verification:</b>
 ```c
 // SDI12 (Start Verification) "aV!" command.
 bool verification( const char *src ) { verification( (const uint8_t *)src ); }
 bool verification( const uint8_t *src );
-
 ```
+>1. ```const (char or uint8_t) *src``` = buffer array you supply to hold returned string.
+
+Example:
+```c
+int error;
+// Buffer to hold returned string.
+char buf[35];
+// Opionally can get debug info on command return
+char debug[10];
+
+error = DECAGON_5TE_10CM.verification( debug );
+if ( !error ) Serial.print( debug );
+
+// Verification needs a return measurement command to get data
+// 'returnMeasurement' function is explained below.
+error = DECAGON_5TE_10CM.returnMeasurement( buf, 0 );
+if ( !error ) Serial.print( buf );
+```
+
 <br><b>measurement:</b>
 ```c
 // SDI12 (Start Measurement) command.
@@ -139,8 +218,60 @@ bool verification( const uint8_t *src );
 bool measurement( int num = -1 ) { uint8_t s[75]; measurement( s, num ); }
 bool measurement( const char *src, int num = -1 ) { measurement( (const uint8_t *)src, num ); }
 bool measurement( const uint8_t *src, int num = -1 );
-
 ```
+>1. ```const (char or uint8_t) *src``` = buffer array you supply to hold returned string.
+>2. ```int num = -1```(optional) = Additional measuremnts.
+
+Example:
+```c
+int error;
+// buffer to hold sensor measurement string. 
+// Max return sensor string size is 81 characters.
+char data[81];
+
+memset( data, 0, 75 );
+memset( debug, 0, 10 );
+// Function to tell sensor to make a measurement.
+// optional additional measurements command.
+/***error = DECAGON_5TE_10CM.measurement( debug, 0 );***/
+error = DECAGON_5TE_10CM.measurement( debug );
+if ( !error ) Serial.print( debug );
+// 'measurement' needs a return measurement command to get data.
+// 'returnMeasurement' function is explained below.
+error = DECAGON_5TE_10CM.returnMeasurement( data, 0 );
+if ( !error ) Serial.print( data );
+
+ memset( data, 0, 75 );
+ memset( debug, 0, 10 );
+// Function to tell sensor to make a measurement.
+// optional additional measurements command.
+/***error = DECAGON_5TE_20CM.measurement( debug, 0 );***/
+ error = DECAGON_5TE_20CM.measurement( debug );
+ if ( !error ) Serial.print( debug );
+ error = DECAGON_5TE_20CM.returnMeasurement( data, 0 );
+ if (!error) Serial.print( data );
+   
+memset( data, 0, 75 );
+memset( debug, 0, 10 );
+// Function to tell sensor to make a measurement.
+// optional additional measurements command.
+/***error = DECAGON_5TE_30CM.measurement( debug, 0 );***/
+error = DECAGON_5TE_30CM.measurement( debug );
+if ( !error ) Serial.print( debug );
+error = DECAGON_5TE_30CM.returnMeasurement( data, 0 );
+if ( !error ) Serial.print( data );
+   
+memset( data, 0, 75 );
+memset( debug, 0, 10 );
+// Function to tell sensor to make a measurement.
+// optional additional measurements command.
+/***error = DECAGON_5TE_40CM.measurement( debug, 0 );***/
+error = DECAGON_5TE_40CM.measurement( debug );
+if ( !error ) Serial.print( debug );
+error = DECAGON_5TE_40CM.returnMeasurement( data, 0 );
+if ( !error ) Serial.print( data );
+```
+
 <br><b>concurrent:</b>
 ```c
 // SDI12 (Start Concurrent Measurement) command.
