@@ -13,7 +13,8 @@
  || nrsys@comcast.net
  ||
  || @description
- || |
+ || | SDI12 CRC library, appends or checks ascii CRC using the algorithm
+ || | supplied from http://www.sdi-12.org/
  || #
  ||
  || @license
@@ -44,6 +45,7 @@ CRC::CRC() {
 }
 
 CRC::~CRC() {
+    
 }
 
 void CRC::append( uint8_t *s ) {
@@ -57,23 +59,31 @@ void CRC::append( uint8_t *s ) {
     appendCRLF ( s );
 }
 
+//----------------------------------------------public------------------------------------------------
+
 int CRC::check( uint8_t *s ) {
     // This public function checks the CRC found at the end of the response to an
     // SDI-12 D command.
     unsigned short receivedCRC;
     unsigned short expectedCRC;
+    
     // get the CRC that was received
     removeCRLF  ( s );
     extractAscii( s );
     asciiToShort(   );
+    
     receivedCRC = sdi12_crc;
     // compute the expected CRC
+    
     removeAscii( s );
-    compute( s );
+    compute    ( s );
+    
     expectedCRC = sdi12_crc;
     if (receivedCRC == expectedCRC) return(0);
     else return(1);
 }
+
+//---------------------------------------------private----------------------------------------------
 
 void CRC::appendAscii( uint8_t *s ) {
     strcat( (char*)s , (char*)asciiCRC );
@@ -100,7 +110,6 @@ void CRC::asciiToShort( ) {
 }
 
 void CRC::compute( uint8_t *s ) {
-    //Serial.printf("compute CRC: %s\n", s );
     // This function computes the CRC using the algorithm found in paragraph
     // 4.4.12.1 of the SDI-12 specification.
     int i;

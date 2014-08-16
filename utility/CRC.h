@@ -13,7 +13,8 @@
  || nrsys@comcast.net
  ||
  || @description
- || |
+ || | SDI12 CRC library, appends or checks ascii CRC using the algorithm
+ || | supplied from http://www.sdi-12.org/
  || #
  ||
  || @license
@@ -46,6 +47,7 @@
 #define CARRIAGE_RETURN     13
 
 #include "Arduino.h"
+
 class CRC {
 public:
     CRC();
