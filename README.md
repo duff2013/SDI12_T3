@@ -88,7 +88,7 @@ SDI12 DECAGON_5TE_30CM( &Serial3, '3', true );
 SDI12 DECAGON_5TE_40CM( &Serial3, '4', true );
 ```
 <br>
-<h3>--------------------------Functions-------------------------------</h3>
+<h3>-----------------------------Functions-------------------------------</h3>
 
 <b>isActive:</b>
 ---
@@ -156,6 +156,7 @@ if( !error ) Serial.println( buf );
 error = DECAGON_5TE_40CM.identification( buf );
 if( !error ) Serial.println( buf );
 ```
+
 <br><b>queryAddress:</b>
 ---
 ```c
@@ -198,6 +199,7 @@ if( address != -1 ) {
     Serial.println( "Address out of range or command failed" );
 }
 ```
+
 <br><b>verification:</b>
 ---
 ```c
@@ -353,7 +355,6 @@ Example:
 // This function will send the send data command to get the data string.
 // Example is provided with 'measurement' function above.
 ```
-
 
 <br>transparent:
 ---
