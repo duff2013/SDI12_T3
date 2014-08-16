@@ -6,7 +6,7 @@
  || @contact 	cmduffy@engr.psu.edu
  ||
  || @description
- || |
+ || | SDI12 library for Teensy 3.0/3.1.
  || #
  ||
  || @license
@@ -74,57 +74,71 @@ private:
 class SDI12 : public UART {
     typedef struct __attribute__((packed)) {
         Stream *uart;
+        uint32_t timeout;
         uint8_t address;
         bool crc;
     } sdi12_t;
+    
+    typedef struct {
+        uint8_t conncurrentCommand[5];
+        SDI12* sdi;
+    } cmd_t;
 public:
     SDI12( void );
-    SDI12( Stream *port, char address, bool crc = false ) ;
-    ~SDI12( void ) {  }
-    //SDI12 & operator = (const SDI12 &rhs) { SDI12 = rhs.SDI12; return *this; }
+    
+    SDI12( Stream *port, char address, bool crc = false ) {
+        sensor.uart = port;
+        sensor.address = address;
+        sensor.crc = crc;
+        init( );
+        allocateVector( );
+    }
+    
+    ~SDI12( void ) {
+        releaseVector( );
+    }
+    
     void begin             ( uint32_t sample_rate, char command );
     void begin             ( void );
-    
-    bool  isActive          ( int address = -1 );
-    
-    bool identification    ( const char *src ) { identification( (const uint8_t *)src ); }
+    bool  isActive         ( int address = -1 );
+    bool identification    ( const char *src ) { return identification( (const uint8_t *)src ); }
     bool identification    ( const uint8_t *src );
-    
     int  queryAddress      ( void );
-    
     int  changeAddress     ( uint8_t new_address );
-    
-    bool verification      ( const char *src ) { verification( (const uint8_t *)src ); }
+    bool verification      ( const char *src ) { return verification( (const uint8_t *)src ); }
     bool verification      ( const uint8_t *src );
-    
-    bool measurement       ( int num = -1 ) { uint8_t s[75]; measurement( s, num ); }
-    bool measurement       ( const char *src, int num = -1 ) { measurement( (const uint8_t *)src, num ); }
+    bool measurement       ( int num = -1 ) { uint8_t s[75]; return measurement( s, num ); }
+    bool measurement       ( const char *src, int num = -1 ) { return measurement( (const uint8_t *)src, num ); }
     bool measurement       ( const uint8_t *src, int num = -1 );
-    
-    bool concurrent        ( int num = -1 ) { uint8_t s[75]; concurrent( s, num ); }
-    bool concurrent        ( const char *src, int num = -1 ) { concurrent( (const uint8_t *)src, num ); }
-    bool concurrent        (  const uint8_t *src, int num  );
-    
-    bool continuous        ( const char *src, int num = -1 ) { continuous( (const uint8_t *)src, num ); }
+    bool concurrent        ( int num = -1 ) { uint8_t s[75]; return concurrent( s, num ); }
+    bool concurrent        ( const char *src, int num = -1 ) { return concurrent( (const uint8_t *)src, num ); }
+    bool concurrent        ( const uint8_t *src, int num  );
+    bool continuous        ( const char *src, int num = -1 ) { return continuous( (const uint8_t *)src, num ); }
     bool continuous        ( const uint8_t *src, int num = -1 );
-    
-    bool returnMeasurement ( const char *src, int num = -1 ) { returnMeasurement( (const uint8_t *)src, num ); }
+    bool returnMeasurement ( const char *src, int num = -1 ) { return returnMeasurement( (const uint8_t *)src, num ); }
     bool returnMeasurement ( const uint8_t *src, int num = -1 );
-    
-    bool transparent       ( const char *command, const uint8_t *src ) { transparent( (uint8_t*)command, src ); }
-    bool transparent       ( const uint8_t *command, const char *src ) { transparent( command, (uint8_t*)src ); }
-    bool transparent       ( const char *command, const char *src ) { transparent( (uint8_t*)command, (uint8_t*)src ); }
+    bool transparent       ( const char *command, const uint8_t *src ) { return transparent( (uint8_t*)command, src ); }
+    bool transparent       ( const uint8_t *command, const char *src ) { return transparent( command, (uint8_t*)src ); }
+    bool transparent       ( const char *command, const char *src ) { return transparent( (uint8_t*)command, (uint8_t*)src ); }
     bool transparent       ( const uint8_t *command, const uint8_t *src );
 private:
-    static SDI12* STATIC;
-    static SDI12* TMP[60];
+    //static SDI12* STATIC;
+    //static cmd_t  cmd[10];
+    //static int    cmdHead;
+    //static int    cmdTail;
+    
     sdi12_t       sensor;
+    
+    void init                    ( void );
+    void allocateVector          ( void );
+    void releaseVector           ( void );
     bool send_command            ( const void *cmd, uint8_t count, uint8_t type );
     void wake_io_blocking        ( void );
     bool wake_io_non_blocking    ( void );
     static void io_break         ( void );
     static void io_mark          ( void );
-    static void concurrentHandle ( void );
+    static void concurrentMeasure( void );
+    static void concurrentData   ( void );
 };
 //-----------------------------------------------------------------------------------------------
 #endif

@@ -27,30 +27,33 @@
 
 IntervalTimer     ioTimer;
 
-volatile bool     serviceRequest;
-volatile bool     commandNotDone;
+volatile bool     serviceRequest = false;
+volatile bool     commandNotDone = false;
 //volatile bool     nonBlockSend;
 //volatile bool     nonBlockRecieve;
 //volatile bool     nonBlockGetData;
-volatile bool     activeAddress[60];
 
 volatile int spot = 0;
 
-volatile uint16_t txHead;
-volatile uint16_t txTail;
-volatile uint16_t rxHead;
-volatile uint16_t rxTail;
+volatile uint16_t txHead = 0;
+volatile uint16_t txTail = 0;
+volatile uint16_t rxHead = 0;
+volatile uint16_t rxTail = 0;
 
-volatile bool     sending;
-volatile bool     ioActive;
-volatile bool     transmitting;
+volatile bool     sending      = false;
+volatile bool     ioActive     = false;
+volatile bool     transmitting = false;
 
-static volatile uint8_t tx_buffer[TX_BUFFER_SIZE];
-static volatile uint8_t rx_buffer[RX_BUFFER_SIZE];
+uint8_t serial1_vector_allocated_mask = 0;
+uint8_t serial2_vector_allocated_mask = 0;
+uint8_t serial3_vector_allocated_mask = 0;
 
-static void uart0_isr( void );
-static void uart1_isr( void );
-static void uart2_isr( void );
+volatile uint8_t tx_buffer[TX_BUFFER_SIZE];
+volatile uint8_t rx_buffer[RX_BUFFER_SIZE];
+
+void uart0_isr( void );
+void uart1_isr( void );
+void uart2_isr( void );
 /****************************************************************************/
 /*                                  UART                                    */
 /****************************************************************************/
@@ -93,55 +96,27 @@ int UART::peek( void ) {
 /****************************************************************************/
 /*                                 SDI12                                    */
 /****************************************************************************/
-SDI12  *SDI12::STATIC;
-SDI12  *SDI12::TMP[];
+//SDI12  *SDI12::STATIC;
+//SDI12::cmd_t SDI12::cmd[];
+//int SDI12::cmdHead;
+//int SDI12::cmdTail;
 
-SDI12::SDI12( Stream *port, char address, bool crc ) {
+void SDI12::init( void ) {
     /*pinMode(13, OUTPUT);
     pinMode(17, OUTPUT);
     pinMode(18, OUTPUT);
     pinMode(19, OUTPUT);
-    pinMode(20, OUTPUT);*/
-    
-    sensor.uart = port;
-    sensor.address = address;
-    sensor.crc = crc;
-    
-    for (int i = 0; i < 60; i++) {
-        activeAddress[i] = false;
-    }
-
-    int ascii_numbers    = (address < 0x30) || (address > 0x39);
-    int ascii_upper_case = (address < 0x41) || (address > 0x5A);
-    int ascii_lower_case = (address < 0x61) || (address > 0x7A);
-    
-    if ( ascii_numbers ) {
-        TMP[address-0x30] = this;
-    }
-    else if (ascii_upper_case) {
-        TMP[address-0x41] = this;
-    }
-    else if (ascii_lower_case) {
-        TMP[address-0x61] = this;
-    }
-    else {
-        return;
-    }
-    
+    pinMode(20, OUTPUT);
     RUN_ONCE_BEGIN;
-    spot           = 0;
-    txHead         = 0;
-    txTail         = 0;
-    rxHead         = 0;
-    rxTail         = 0;
-    sending        = false;
-    ioActive       = false;
-    transmitting   = false;
-    serviceRequest = false;
-    commandNotDone = false;
+    //cmdHead        = 0;
+    //cmdTail        = 0;
     RUN_ONCE_END;
+    int registeredAddress = sensor.address;
+    int ascii_numbers    = (registeredAddress >= 0x30) && (registeredAddress <= 0x39);
+    int ascii_upper_case = (registeredAddress >= 0x41) && (registeredAddress <= 0x5A);
+    int ascii_lower_case = (registeredAddress >= 0x61) && (registeredAddress <= 0x7A);*/
     
-    if ( port == &Serial1 ) {
+    if ( sensor.uart == &Serial1 ) {
         RUN_ONCE_BEGIN;
         ENABLE_UART0;
         attachInterruptVector( IRQ_UART0_STATUS, uart0_isr );
@@ -156,7 +131,7 @@ SDI12::SDI12( Stream *port, char address, bool crc ) {
         PIN_NUM_RX = 0;
         PIN_NUM_TX = 1;
     }
-    else if ( port == &Serial2 ) {
+    else if ( sensor.uart == &Serial2 ) {
         RUN_ONCE_BEGIN;
         ENABLE_UART1;
         attachInterruptVector( IRQ_UART1_STATUS, uart1_isr );
@@ -171,7 +146,7 @@ SDI12::SDI12( Stream *port, char address, bool crc ) {
         PIN_NUM_RX = 9;
         PIN_NUM_TX = 10;
     }
-    else if ( port == &Serial3 ) {
+    else if ( sensor.uart == &Serial3 ) {
         RUN_ONCE_BEGIN;
         ENABLE_UART2;
         attachInterruptVector( IRQ_UART2_STATUS, uart2_isr );
@@ -188,8 +163,122 @@ SDI12::SDI12( Stream *port, char address, bool crc ) {
     }
 }
 
+void SDI12::allocateVector( void ) {
+    uint32_t vect_channel = 0;
+    
+    if (sensor.uart == &Serial1) {
+        __disable_irq();
+        while (1) {
+            if (!(serial1_vector_allocated_mask & (1 << vect_channel))) {
+                serial1_vector_allocated_mask |= (1 << vect_channel);
+                __enable_irq();
+                break;
+            }
+            if (++vect_channel >= 8) {
+                __enable_irq();
+                return; // no more vector channels available
+            }
+        }
+    }
+    else if (sensor.uart == &Serial2) {
+        __disable_irq();
+        while (1) {
+            if (!(serial2_vector_allocated_mask & (1 << vect_channel))) {
+                serial2_vector_allocated_mask |= (1 << vect_channel);
+                __enable_irq();
+                break;
+            }
+            if (++vect_channel >= 8) {
+                __enable_irq();
+                return; // no more vector channels available
+            }
+        }
+    }
+    else if (sensor.uart == &Serial3) {
+        __disable_irq();
+        while (1) {
+            if (!(serial3_vector_allocated_mask & (1 << vect_channel))) {
+                serial3_vector_allocated_mask |= (1 << vect_channel);
+                __enable_irq();
+                break;
+            }
+            if (++vect_channel >= 8) {
+                __enable_irq();
+                return; // no more vector channels available
+            }
+        }
+    }
+    /*Serial.printf("a serial1_vector_allocated_mask: %04X | ", serial1_vector_allocated_mask);
+    Serial.println(serial1_vector_allocated_mask, BIN);
+    Serial.printf("a serial2_vector_allocated_mask: %04X | ", serial2_vector_allocated_mask);
+    Serial.println(serial2_vector_allocated_mask, BIN);
+    Serial.printf("a serial3_vector_allocated_mask: %04X | ", serial3_vector_allocated_mask);
+    Serial.println(serial3_vector_allocated_mask, BIN);
+    Serial.println();*/
+}
+
+void SDI12::releaseVector( void ) {
+    uint32_t vect_channel = 0xFF;
+    
+    if ( sensor.uart == &Serial1 ) {
+        __disable_irq( );
+        while ( 1 ) {
+            if ( ( serial1_vector_allocated_mask & (1 << vect_channel) ) ) {
+                serial1_vector_allocated_mask &= ~(1 << vect_channel);
+                __enable_irq( );
+                break;
+            }
+            vect_channel--;
+        }
+        __disable_irq();
+        if ( serial1_vector_allocated_mask == 0 ) {
+            detachInterruptVector( IRQ_UART0_STATUS );
+            __enable_irq( );
+        }
+    }
+    else if ( sensor.uart == &Serial2 ) {
+        __disable_irq( );
+        while ( 1 ) {
+            if ( ( serial2_vector_allocated_mask & (1 << vect_channel) ) ) {
+                serial2_vector_allocated_mask &= ~(1 << vect_channel);
+                __enable_irq( );
+                break;
+            }
+            vect_channel--;
+        }
+        __disable_irq( );
+        if ( serial2_vector_allocated_mask == 0 ) {
+            detachInterruptVector( IRQ_UART1_STATUS );
+            __enable_irq( );
+        }
+    }
+    else if ( sensor.uart == &Serial3 ) {
+        __disable_irq( );
+        while ( 1 ) {
+            if ( ( serial3_vector_allocated_mask & (1 << vect_channel) ) ) {
+                serial3_vector_allocated_mask &= ~(1 << vect_channel);
+                __enable_irq( );
+                break;
+            }
+            vect_channel--;
+        }
+        __disable_irq( );
+        if ( serial3_vector_allocated_mask == 0 ) {
+            detachInterruptVector( IRQ_UART2_STATUS );
+            __enable_irq( );
+        }
+    }
+    /*Serial.printf("r serial1_vector_allocated_mask: %04X | ", serial1_vector_allocated_mask);
+    Serial.println(serial1_vector_allocated_mask, BIN);
+    Serial.printf("r serial2_vector_allocated_mask: %04X | ", serial2_vector_allocated_mask);
+    Serial.println(serial2_vector_allocated_mask, BIN);
+    Serial.printf("r serial3_vector_allocated_mask: %04X | ", serial3_vector_allocated_mask);
+    Serial.println(serial3_vector_allocated_mask, BIN);
+    Serial.println();*/
+}
+
 void SDI12::begin( void ) {
-    Serial.printf("Address: %c\n",TMP[sensor.address]->sensor.address);
+
 }
 
 bool SDI12::isActive( int address ) {
@@ -391,9 +480,9 @@ bool SDI12::measurement( const uint8_t *src, int num ) {
 }
 
 bool SDI12::concurrent( const uint8_t *src, int num ) {
-    bool error;
+    /*bool error;
     uint8_t *s = ( uint8_t * )src;
-    activeAddress[sensor.address] = true;
+    
     uint8_t command[5];
     command[0] = sensor.address;
     command[1] = 'C';
@@ -401,11 +490,32 @@ bool SDI12::concurrent( const uint8_t *src, int num ) {
         if (sensor.crc) {
             command[2]  = 'C';
             command[3]  = '!';
+            if ( ioActive ) {
+                cmd_t* p = &cmd[cmdHead];
+                p->conncurrentCommand[0] = command[0];
+                p->conncurrentCommand[1] = command[1];
+                p->conncurrentCommand[2] = command[2];
+                p->conncurrentCommand[3] = command[3];
+                p->sdi = this;
+                cmdHead = cmdHead < (10 - 1) ? cmdHead + 1 : 0;
+                return false;
+            }
+            ioActive = true;
             error = send_command( command, 4, NON_BLOCKING );
             if ( error ) return error;
         }
         else {
             command[2]  = '!';
+            if ( ioActive ) {
+                cmd_t* p = &cmd[cmdHead];
+                p->conncurrentCommand[0] = command[0];
+                p->conncurrentCommand[1] = command[1];
+                p->conncurrentCommand[2] = command[2];
+                p->sdi = this;
+                cmdHead = cmdHead < (10 - 1) ? cmdHead + 1 : 0;
+                return false;
+            }
+            ioActive = true;
             error = send_command( command, 3, NON_BLOCKING );
             if ( error ) return error;
         }
@@ -415,16 +525,39 @@ bool SDI12::concurrent( const uint8_t *src, int num ) {
             command[2]  = num + 0x30;
             command[3]  = 'C';
             command[4]  = '!';
+            if ( ioActive ) {
+                cmd_t* p = &cmd[cmdHead];
+                p->conncurrentCommand[0] = command[0];
+                p->conncurrentCommand[1] = command[1];
+                p->conncurrentCommand[2] = command[2];
+                p->conncurrentCommand[3] = command[3];
+                p->conncurrentCommand[4] = command[4];
+                p->sdi = this;
+                cmdHead = cmdHead < (10 - 1) ? cmdHead + 1 : 0;
+                return false;
+            }
+            ioActive = true;
             error = send_command( command, 5, NON_BLOCKING );
             if ( error ) return error;
         }
         else {
             command[2]  = num + 0x30;
             command[3]  = '!';
+            if ( ioActive ) {
+                cmd_t* p = &cmd[cmdHead];
+                p->conncurrentCommand[0] = command[0];
+                p->conncurrentCommand[1] = command[1];
+                p->conncurrentCommand[2] = command[2];
+                p->conncurrentCommand[3] = command[3];
+                p->sdi = this;
+                cmdHead = cmdHead < (10 - 1) ? cmdHead + 1 : 0;
+                return false;
+            }
+            ioActive = true;
             error = send_command( command, 4, NON_BLOCKING );
             if ( error ) return error;
         }
-    }
+    }*/
 }
 
 bool SDI12::continuous( const uint8_t *src, int num ) {
@@ -544,8 +677,8 @@ bool SDI12::send_command( const void *cmd, uint8_t count, uint8_t type ) {
             if ( time >= 1000 ) { commandNotDone = false; return true; }
             break;
         case NON_BLOCKING:
-            STATIC = this;
-            wake_io_non_blocking( );
+            //STATIC = this;
+            //wake_io_non_blocking( );
             break;
         default:
             break;
@@ -567,33 +700,32 @@ void SDI12::wake_io_blocking( void ) {
 }
 
 bool SDI12::wake_io_non_blocking( void ) {
-    //STATIC = this;
-    transmitting = true;
+    /*transmitting = true;
     volatile uint32_t *config;
     config = portConfigRegister( PIN_NUM_TX );
     *portModeRegister( PIN_NUM_TX ) = 1;
     *config = PORT_PCR_SRE | PORT_PCR_DSE | PORT_PCR_MUX( 1 );
     *SET = BITMASK;
     bool error = ioTimer.begin( io_break, 12000 );
-    return !error;
+    return !error;*/
 }
 
 void SDI12::io_break( void ) {
-    *STATIC->TX_PIN = PORT_PCR_DSE | PORT_PCR_SRE | PORT_PCR_MUX( 3 );
-    STATIC->REG->C3 |= UART_TX_DIR_OUT;
-    ioTimer.begin( io_mark, 8333 );
+    //*STATIC->TX_PIN = PORT_PCR_DSE | PORT_PCR_SRE | PORT_PCR_MUX( 3 );
+    //STATIC->REG->C3 |= UART_TX_DIR_OUT;
+    //ioTimer.begin( io_mark, 8333 );
 }
 
 void SDI12::io_mark( void ) {
-    ioTimer.end( );
-    ioTimer.begin( concurrentHandle, 8333 );
-    if ( !ioActive ) STATIC->REG->C2 = C2_TX_ACTIVE;
+    //ioTimer.end( );
+    //ioTimer.begin( concurrentMeasure, 1000 );
+    //STATIC->REG->C2 = C2_TX_ACTIVE;
 }
 
-void SDI12::concurrentHandle( void ) {
-    UART uart;
+void SDI12::concurrentMeasure( void ) {
+    /*UART uart;
     int i = 0;
-    char tmp[75];
+    char tmp[81];
     int timeout;
     uint8_t measureCmd[4];
     
@@ -624,9 +756,10 @@ void SDI12::concurrentHandle( void ) {
             timeout += (tmp[2] - 0x30) * 10;
             timeout += (tmp[3] - 0x30);
             timeout *= 1000000;
+            ioActive = false;
             Serial.printf("case 2 | timeout: %i\n", timeout);
-            spot = 3;
-            ioTimer.begin( concurrentHandle, timeout );
+            spot = 0;
+            //ioTimer.begin( concurrentMeasure, timeout );
             break;
         case 3:
             ioTimer.end( );
@@ -664,7 +797,7 @@ void SDI12::concurrentHandle( void ) {
         default:
             break;
     }
-    //__enable_irq();
+*/
 }
 //---------------------------------------------uart0_isr------------------------------------------
 void uart0_isr( void ) {
@@ -756,9 +889,7 @@ void uart2_isr( void ) {
             head += 1;
             if ( head >= RX_BUFFER_SIZE ) head = 0;
             rx_buffer[head] = n;
-            if ( commandNotDone && n == 0x0A ) {
-                commandNotDone = false;
-            }
+            if ( commandNotDone && n == 0x0A ) commandNotDone = false;
             else if ( serviceRequest && n == 0x0A ) serviceRequest = false;
             rxHead = head;
         }
