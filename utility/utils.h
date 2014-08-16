@@ -67,7 +67,7 @@ static run_once __o;
 
 #define BLOCKING            1
 #define NON_BLOCKING        2
-
+// --------------------------------------------------------------------------------------------
 #define ENABLE_UART0 ({                                                             \
     BITBAND_U32(SIM_SCGC4, SCGC4_UART0_BIT) = 0x01;                                 \
     CORE_PIN0_CONFIG = PORT_PCR_PE | PORT_PCR_PS | PORT_PCR_PFE | PORT_PCR_MUX(3);  \
