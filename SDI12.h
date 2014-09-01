@@ -81,7 +81,9 @@ class SDI12 : public UART {
     
     typedef struct {
         uint8_t conncurrentCommand[5];
-        SDI12* sdi;
+        uint8_t conncurentData[82];
+        uint32_t timeout;
+        SDI12*  Class;
     } cmd_t;
 public:
     SDI12( void );
@@ -122,10 +124,10 @@ public:
     bool transparent       ( const char *command, const char *src ) { return transparent( (uint8_t*)command, (uint8_t*)src ); }
     bool transparent       ( const uint8_t *command, const uint8_t *src );
 private:
-    //static SDI12* STATIC;
-    //static cmd_t  cmd[10];
-    //static int    cmdHead;
-    //static int    cmdTail;
+    static SDI12* STATIC;
+    static cmd_t  conncurrent_cmd[10];
+    static int    cmdHead;
+    static int    cmdTail;
     
     sdi12_t       sensor;
     

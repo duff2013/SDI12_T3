@@ -96,25 +96,25 @@ int UART::peek( void ) {
 /****************************************************************************/
 /*                                 SDI12                                    */
 /****************************************************************************/
-//SDI12  *SDI12::STATIC;
-//SDI12::cmd_t SDI12::cmd[];
-//int SDI12::cmdHead;
-//int SDI12::cmdTail;
+SDI12  *SDI12::STATIC;
+SDI12::cmd_t SDI12::conncurrent_cmd[];
+int SDI12::cmdHead;
+int SDI12::cmdTail;
 
 void SDI12::init( void ) {
-    /*pinMode(13, OUTPUT);
+    pinMode(13, OUTPUT);
     pinMode(17, OUTPUT);
     pinMode(18, OUTPUT);
     pinMode(19, OUTPUT);
     pinMode(20, OUTPUT);
     RUN_ONCE_BEGIN;
-    //cmdHead        = 0;
-    //cmdTail        = 0;
+    cmdHead        = 0;
+    cmdTail        = 0;
     RUN_ONCE_END;
     int registeredAddress = sensor.address;
     int ascii_numbers    = (registeredAddress >= 0x30) && (registeredAddress <= 0x39);
     int ascii_upper_case = (registeredAddress >= 0x41) && (registeredAddress <= 0x5A);
-    int ascii_lower_case = (registeredAddress >= 0x61) && (registeredAddress <= 0x7A);*/
+    int ascii_lower_case = (registeredAddress >= 0x61) && (registeredAddress <= 0x7A);
     
     if ( sensor.uart == &Serial1 ) {
         RUN_ONCE_BEGIN;
@@ -232,7 +232,7 @@ void SDI12::releaseVector( void ) {
         }
         __disable_irq();
         if ( serial1_vector_allocated_mask == 0 ) {
-            detachInterruptVector( IRQ_UART0_STATUS );
+            //detachInterruptVector( IRQ_UART0_STATUS );
             __enable_irq( );
         }
     }
@@ -248,7 +248,7 @@ void SDI12::releaseVector( void ) {
         }
         __disable_irq( );
         if ( serial2_vector_allocated_mask == 0 ) {
-            detachInterruptVector( IRQ_UART1_STATUS );
+            //detachInterruptVector( IRQ_UART1_STATUS );
             __enable_irq( );
         }
     }
@@ -264,7 +264,7 @@ void SDI12::releaseVector( void ) {
         }
         __disable_irq( );
         if ( serial3_vector_allocated_mask == 0 ) {
-            detachInterruptVector( IRQ_UART2_STATUS );
+            //detachInterruptVector( IRQ_UART2_STATUS );
             __enable_irq( );
         }
     }
@@ -318,24 +318,19 @@ bool SDI12::identification( const uint8_t *src ) {
 
 int SDI12::changeAddress( uint8_t new_address ) {
     if ( new_address == sensor.address ) return -1;
+    
     bool error;
     
-    int ascii_numbers    = (new_address < 0x30) || (new_address > 0x39);
-    int ascii_upper_case = (new_address < 0x41) || (new_address > 0x5A);
-    int ascii_lower_case = (new_address < 0x61) || (new_address > 0x7A);
+    int ascii_numbers    = ( new_address < 0x30 ) || ( new_address > 0x39 );
+    int ascii_upper_case = ( new_address < 0x41 ) || ( new_address > 0x5A );
+    int ascii_lower_case = ( new_address < 0x61 ) || ( new_address > 0x7A );
 
-    if (ascii_numbers & ascii_lower_case & ascii_upper_case) {
-        //Serial.println("Address out of range");
-        return -1;
-    }
+    if (ascii_numbers & ascii_lower_case & ascii_upper_case) return -1;
     
     int address;
     address = isActive( );
     
-    if ( address == -1 ) {
-        Serial.println("Bad Address");
-        return -1;
-    }
+    if ( address == -1 ) return -1;
     
     uint8_t command[4];
     command[0] = sensor.address;
@@ -354,7 +349,7 @@ int SDI12::changeAddress( uint8_t new_address ) {
         sensor.address = p[0];
         return p[0];
     }
-    else sensor.address;
+    else return sensor.address;
 }
 
 int SDI12::queryAddress( void ) {
@@ -392,13 +387,13 @@ bool SDI12::verification( const uint8_t *src ) {
     serviceRequest = true;
     while ( available( ) ) *s++ = v_reponse[i++] = read( );
     
-    if ( v_reponse[0] != sensor.address) return true;
-    if ( 0x30 > v_reponse[1] > 0x39 ) return true;
-    if ( 0x30 > v_reponse[2] > 0x39 ) return true;
-    if ( 0x30 > v_reponse[3] > 0x39 ) return true;
-    timeout  = (v_reponse[1] - 0x30) * 100;
-    timeout += (v_reponse[2] - 0x30) * 10;
-    timeout += (v_reponse[3] - 0x30);
+    if ( v_reponse[0] != sensor.address ) return true;
+    if ( (v_reponse[1] < 0x30) || (v_reponse[1] > 0x39) ) return true;
+    if ( (v_reponse[2] < 0x30) || (v_reponse[2] > 0x39) ) return true;
+    if ( (v_reponse[3] < 0x30) || (v_reponse[3] > 0x39) ) return true;
+    timeout  = ( v_reponse[1] - 0x30 ) * 100;
+    timeout += ( v_reponse[2] - 0x30 ) * 10;
+    timeout += ( v_reponse[3] - 0x30 );
     timeout *= 1000;
     timeout += 10;
     
@@ -417,6 +412,7 @@ bool SDI12::verification( const uint8_t *src ) {
 bool SDI12::measurement( const uint8_t *src, int num ) {
     bool error;
     uint8_t *s = ( uint8_t * )src;
+    
     uint8_t command[5];
     command[0] = sensor.address;
     command[1] = 'M';
@@ -457,12 +453,12 @@ bool SDI12::measurement( const uint8_t *src, int num ) {
     
     //Serial.printf("m_responce: %s", m_reponse);
     if ( m_reponse[0] != sensor.address) return true;
-    if ( 0x30 > m_reponse[1] > 0x39 ) return true;
-    if ( 0x30 > m_reponse[2] > 0x39 ) return true;
-    if ( 0x30 > m_reponse[3] > 0x39 ) return true;
-    timeout  = (m_reponse[1] - 0x30) * 100;
-    timeout += (m_reponse[2] - 0x30) * 10;
-    timeout += (m_reponse[3] - 0x30);
+    if ( (m_reponse[1] < 0x30) || (m_reponse[1] > 0x39) ) return true;
+    if ( (m_reponse[2] < 0x30) || (m_reponse[2] > 0x39) ) return true;
+    if ( (m_reponse[3] < 0x30) || (m_reponse[3] > 0x39) ) return true;
+    timeout  = ( m_reponse[1] - 0x30 ) * 100;
+    timeout += ( m_reponse[2] - 0x30 ) * 10;
+    timeout += ( m_reponse[3] - 0x30 );
     timeout *= 1000;
     timeout += 10;
     
@@ -480,84 +476,86 @@ bool SDI12::measurement( const uint8_t *src, int num ) {
 }
 
 bool SDI12::concurrent( const uint8_t *src, int num ) {
-    /*bool error;
-    uint8_t *s = ( uint8_t * )src;
+    bool error;
+    //uint8_t *s = ( uint8_t * )src;
     
-    uint8_t command[5];
-    command[0] = sensor.address;
-    command[1] = 'C';
+    cmd_t* p = &conncurrent_cmd[cmdHead];
+    //Serial.printf("\nhead: %i | tail: %i\n", cmdHead, cmdTail);
+    
     if (num < 0) {
         if (sensor.crc) {
-            command[2]  = 'C';
-            command[3]  = '!';
+            p->conncurrentCommand[0]  = sensor.address;
+            p->conncurrentCommand[1]  = 'C';
+            p->conncurrentCommand[2]  = 'C';
+            p->conncurrentCommand[3]  = '!';
+            p->Class = this;
+            cmdHead = cmdHead < (10 - 1) ? cmdHead + 1 : 0;
             if ( ioActive ) {
-                cmd_t* p = &cmd[cmdHead];
-                p->conncurrentCommand[0] = command[0];
-                p->conncurrentCommand[1] = command[1];
-                p->conncurrentCommand[2] = command[2];
-                p->conncurrentCommand[3] = command[3];
-                p->sdi = this;
-                cmdHead = cmdHead < (10 - 1) ? cmdHead + 1 : 0;
                 return false;
             }
             ioActive = true;
-            error = send_command( command, 4, NON_BLOCKING );
-            if ( error ) return error;
+            error = send_command( p->conncurrentCommand, 4, NON_BLOCKING );
+            return error;
         }
         else {
-            command[2]  = '!';
+            p->conncurrentCommand[0]  = sensor.address;
+            p->conncurrentCommand[1]  = 'C';
+            p->conncurrentCommand[2]  = '!';
+            p->Class = this;
+            cmdHead = cmdHead < (10 - 1) ? cmdHead + 1 : 0;
             if ( ioActive ) {
-                cmd_t* p = &cmd[cmdHead];
-                p->conncurrentCommand[0] = command[0];
-                p->conncurrentCommand[1] = command[1];
-                p->conncurrentCommand[2] = command[2];
-                p->sdi = this;
-                cmdHead = cmdHead < (10 - 1) ? cmdHead + 1 : 0;
                 return false;
             }
             ioActive = true;
-            error = send_command( command, 3, NON_BLOCKING );
-            if ( error ) return error;
+            error = send_command( p->conncurrentCommand, 3, NON_BLOCKING );
+            return error;
         }
     }
     else {
         if (sensor.crc) {
-            command[2]  = num + 0x30;
-            command[3]  = 'C';
-            command[4]  = '!';
+            p->conncurrentCommand[0]  = sensor.address;
+            p->conncurrentCommand[1]  = 'C';
+            p->conncurrentCommand[2]  = num + 0x30;
+            p->conncurrentCommand[3]  = 'C';
+            p->conncurrentCommand[4]  = '!';
+            p->Class = this;
+            cmdHead = cmdHead < (10 - 1) ? cmdHead + 1 : 0;
             if ( ioActive ) {
-                cmd_t* p = &cmd[cmdHead];
-                p->conncurrentCommand[0] = command[0];
-                p->conncurrentCommand[1] = command[1];
-                p->conncurrentCommand[2] = command[2];
-                p->conncurrentCommand[3] = command[3];
-                p->conncurrentCommand[4] = command[4];
-                p->sdi = this;
-                cmdHead = cmdHead < (10 - 1) ? cmdHead + 1 : 0;
                 return false;
             }
             ioActive = true;
-            error = send_command( command, 5, NON_BLOCKING );
-            if ( error ) return error;
+            error = send_command( p->conncurrentCommand, 5, NON_BLOCKING );
+            return error;
         }
         else {
-            command[2]  = num + 0x30;
-            command[3]  = '!';
+            p->conncurrentCommand[0]  = sensor.address;
+            p->conncurrentCommand[1]  = 'C';
+            p->conncurrentCommand[2]  = num + 0x30;
+            p->conncurrentCommand[3]  = '!';
+            p->Class = this;
+            cmdHead = cmdHead < (10 - 1) ? cmdHead + 1 : 0;
             if ( ioActive ) {
-                cmd_t* p = &cmd[cmdHead];
-                p->conncurrentCommand[0] = command[0];
-                p->conncurrentCommand[1] = command[1];
-                p->conncurrentCommand[2] = command[2];
-                p->conncurrentCommand[3] = command[3];
-                p->sdi = this;
-                cmdHead = cmdHead < (10 - 1) ? cmdHead + 1 : 0;
                 return false;
             }
             ioActive = true;
-            error = send_command( command, 4, NON_BLOCKING );
-            if ( error ) return error;
+            error = send_command( p->conncurrentCommand, 4, NON_BLOCKING );
+            return error;
         }
-    }*/
+    }
+    /*static int b = 0;
+    if (b >= 5) {
+        Serial.println("Commands:");
+        int i = 0;
+        while (cmdHead != cmdTail) {
+            //for (int i = 0; i<10; i++) {
+            cmd_t* p = &conncurrent_cmd[cmdTail];
+            Serial.println((char *)p->conncurrentCommand);
+            cmdTail = cmdTail < (10 - 1) ? cmdTail + 1 : 0;
+        }
+        b = 0;
+    }
+    b++;*/
+    //ioActive = false;
 }
 
 bool SDI12::continuous( const uint8_t *src, int num ) {
@@ -659,7 +657,7 @@ bool SDI12::send_command( const void *cmd, uint8_t count, uint8_t type ) {
     const uint8_t *p = ( const uint8_t * )cmd;
     commandNotDone = true;
     elapsedMillis time;
-    int head = txHead;
+    uint32_t head = txHead;
     
     while ( count-- > 0 ) {
         tx_buffer[head] = *p++;
@@ -669,6 +667,7 @@ bool SDI12::send_command( const void *cmd, uint8_t count, uint8_t type ) {
     
     switch ( type ) {
         case BLOCKING:
+            flush( );
             wake_io_blocking( );
             REG->C2 = C2_TX_ACTIVE;
             flush( );
@@ -678,7 +677,7 @@ bool SDI12::send_command( const void *cmd, uint8_t count, uint8_t type ) {
             break;
         case NON_BLOCKING:
             //STATIC = this;
-            //wake_io_non_blocking( );
+            wake_io_non_blocking( );
             break;
         default:
             break;
@@ -700,45 +699,52 @@ void SDI12::wake_io_blocking( void ) {
 }
 
 bool SDI12::wake_io_non_blocking( void ) {
-    /*transmitting = true;
+    transmitting = true;
     volatile uint32_t *config;
     config = portConfigRegister( PIN_NUM_TX );
     *portModeRegister( PIN_NUM_TX ) = 1;
     *config = PORT_PCR_SRE | PORT_PCR_DSE | PORT_PCR_MUX( 1 );
     *SET = BITMASK;
     bool error = ioTimer.begin( io_break, 12000 );
-    return !error;*/
+    return !error;
 }
 
 void SDI12::io_break( void ) {
+    cmd_t* p = &conncurrent_cmd[cmdTail];
+    *p->Class->TX_PIN = PORT_PCR_DSE | PORT_PCR_SRE | PORT_PCR_MUX( 3 );
+    p->Class->REG->C3 |= UART_TX_DIR_OUT;
     //*STATIC->TX_PIN = PORT_PCR_DSE | PORT_PCR_SRE | PORT_PCR_MUX( 3 );
     //STATIC->REG->C3 |= UART_TX_DIR_OUT;
-    //ioTimer.begin( io_mark, 8333 );
+    ioTimer.begin( io_mark, 8333 );
 }
 
 void SDI12::io_mark( void ) {
-    //ioTimer.end( );
-    //ioTimer.begin( concurrentMeasure, 1000 );
+    cmd_t* p = &conncurrent_cmd[cmdTail];
+    ioTimer.end( );
+    ioTimer.begin( concurrentMeasure, 1000 );
+    p->Class->REG->C2 = C2_TX_ACTIVE;
     //STATIC->REG->C2 = C2_TX_ACTIVE;
 }
 
 void SDI12::concurrentMeasure( void ) {
-    /*UART uart;
+    cmd_t* p = &conncurrent_cmd[cmdTail];
+    UART uart;
     int i = 0;
-    char tmp[81];
+    char tmp[82];
+    memset(tmp, 0, 82);
     int timeout;
     uint8_t measureCmd[4];
     
     switch (spot) {
         case 0:
             if ( !transmitting ) {
-                Serial.println("case 0");
+                Serial.println("case 0 | Transmitting");
                 spot = 1;
             }
             break;
         case 1:
             if ( !commandNotDone  ) {
-                Serial.println("case 1");
+                Serial.println("case 1 | Command Done");
                 spot = 2;
             }
             break;
@@ -756,48 +762,54 @@ void SDI12::concurrentMeasure( void ) {
             timeout += (tmp[2] - 0x30) * 10;
             timeout += (tmp[3] - 0x30);
             timeout *= 1000000;
-            ioActive = false;
-            Serial.printf("case 2 | timeout: %i\n", timeout);
-            spot = 0;
-            //ioTimer.begin( concurrentMeasure, timeout );
+            Serial.printf("case 2 | Timeout: %i | String Returned: %s", timeout, tmp);
+            spot = 3;
+            ioTimer.begin( concurrentMeasure, timeout );
             break;
         case 3:
             ioTimer.end( );
-            measureCmd[0] = STATIC->sensor.address;
+            measureCmd[0] = p->Class->sensor.address;
             measureCmd[1] = 'D';
             measureCmd[2] = '0';
             measureCmd[3] = '!';
-            Serial.printf("case 3 | cmd: %s\n", measureCmd);
-            STATIC->send_command(measureCmd, 4, NON_BLOCKING);
+            Serial.printf("case 3 | Command: %s\n", measureCmd);
+            p->Class->send_command(measureCmd, 4, NON_BLOCKING);
             spot = 4;
             break;
         case 4:
             if ( !transmitting ) {
-                Serial.println("case 4");
+                Serial.println("case 4 | Transmitting");
                 spot = 5;
             }
             break;
         case 5:
             if ( !commandNotDone  ) {
-                Serial.println("case 5");
+                Serial.println("case 5 | Command Done");
                 spot = 6;
             }
             break;
         case 6:
             ioTimer.end( );
+            cmdTail = cmdTail < (10 - 1) ? cmdTail + 1 : 0;
             i=0;
             while ( uart.available( ) ) {
                 tmp[i++] = uart.read( );
             }
-            Serial.print("case 6 | ");
+            Serial.printf("case 6 | head: %i | tail: %i | Data Returned: ", cmdHead, cmdTail);
             Serial.write(tmp,i);
-            ioActive = false;
+            Serial.println();
+            if ( cmdHead != cmdTail ) {
+                cmd_t* u = &conncurrent_cmd[cmdTail];
+                u->Class->send_command(u->conncurrentCommand, 4, NON_BLOCKING);
+            }
+            else {
+                ioActive = false;
+            }
             spot = 0;
             break;
         default:
             break;
     }
-*/
 }
 //---------------------------------------------uart0_isr------------------------------------------
 void uart0_isr( void ) {
