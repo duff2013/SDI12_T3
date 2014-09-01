@@ -104,7 +104,7 @@ static run_once __o;
     BITBAND_U32(SIM_SCGC4, SCGC4_UART2_BIT) = 0x01;                                 \
     CORE_PIN7_CONFIG = PORT_PCR_PE | PORT_PCR_PS | PORT_PCR_PFE | PORT_PCR_MUX(3);  \
     CORE_PIN8_CONFIG = PORT_PCR_DSE | PORT_PCR_SRE | PORT_PCR_MUX(3);               \
-    int divisor = BAUD2DIV(1200);                                                   \
+    int divisor = BAUD2DIV3(1200);                                                  \
     UART2_BDH = (divisor >> 13) & 0x1F;                                             \
     UART2_BDL = (divisor >> 5) & 0xFF;                                              \
     UART2_C4 = divisor & 0x1F;                                                      \
