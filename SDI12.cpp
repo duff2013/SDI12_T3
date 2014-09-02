@@ -675,18 +675,17 @@ bool SDI12::send_command( const void *cmd, uint8_t count, uint8_t type ) {
             flush( );
             wake_io_blocking( );
             RETRY_COMMAND:
-            transmitting = true;
             startBit = false;
             REG->C2 = C2_TX_ACTIVE;
             flush( );
             time = 0;
             while ( !startBit ) {
                 if (time >= 20) {
-                    Serial.println("hello");
                     retry--;
                     if (retry == 0) break;
                     if ( txTail - cnt < 0) txTail = (txTail - cnt) + TX_BUFFER_SIZE;
                     else txTail -= cnt;
+                    transmitting = true;
                     REG->C3 |= UART_TX_DIR_OUT;
                     goto RETRY_COMMAND;
                 }
