@@ -102,7 +102,7 @@ public:
     
     void begin             ( uint32_t sample_rate, char command );
     void begin             ( void );
-    bool  isActive         ( int address = -1 );
+    bool isActive          ( int address = -1 );
     bool identification    ( const char *src ) { return identification( (const uint8_t *)src ); }
     bool identification    ( const uint8_t *src );
     int  queryAddress      ( void );
@@ -137,6 +137,7 @@ private:
     bool send_command            ( const void *cmd, uint8_t count, uint8_t type );
     void wake_io_blocking        ( void );
     bool wake_io_non_blocking    ( void );
+    
     static void io_break         ( void );
     static void io_mark          ( void );
     static void concurrentMeasure( void );

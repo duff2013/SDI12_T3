@@ -29,6 +29,7 @@ IntervalTimer     ioTimer;
 
 volatile bool     serviceRequest = false;
 volatile bool     commandNotDone = false;
+volatile bool     startBit       = false;
 //volatile bool     nonBlockSend;
 //volatile bool     nonBlockRecieve;
 //volatile bool     nonBlockGetData;
@@ -115,6 +116,7 @@ void SDI12::init( void ) {
     int ascii_numbers    = (registeredAddress >= 0x30) && (registeredAddress <= 0x39);
     int ascii_upper_case = (registeredAddress >= 0x41) && (registeredAddress <= 0x5A);
     int ascii_lower_case = (registeredAddress >= 0x61) && (registeredAddress <= 0x7A);
+    
     
     if ( sensor.uart == &Serial1 ) {
         RUN_ONCE_BEGIN;
@@ -349,7 +351,7 @@ int SDI12::changeAddress( uint8_t new_address ) {
         sensor.address = p[0];
         return p[0];
     }
-    else return sensor.address;
+    else return -1;
 }
 
 int SDI12::queryAddress( void ) {
@@ -654,9 +656,12 @@ bool SDI12::returnMeasurement( const uint8_t *src, int num ) {
 }
 //---------------------------------------------private---------------------------------------------
 bool SDI12::send_command( const void *cmd, uint8_t count, uint8_t type ) {
+
     const uint8_t *p = ( const uint8_t * )cmd;
     commandNotDone = true;
     elapsedMillis time;
+    int retry = 3;
+    int cnt = count;
     uint32_t head = txHead;
     
     while ( count-- > 0 ) {
@@ -669,14 +674,28 @@ bool SDI12::send_command( const void *cmd, uint8_t count, uint8_t type ) {
         case BLOCKING:
             flush( );
             wake_io_blocking( );
+            RETRY_COMMAND:
+            transmitting = true;
+            startBit = false;
             REG->C2 = C2_TX_ACTIVE;
             flush( );
+            time = 0;
+            while ( !startBit ) {
+                if (time >= 20) {
+                    Serial.println("hello");
+                    retry--;
+                    if (retry == 0) break;
+                    if ( txTail - cnt < 0) txTail = (txTail - cnt) + TX_BUFFER_SIZE;
+                    else txTail -= cnt;
+                    REG->C3 |= UART_TX_DIR_OUT;
+                    goto RETRY_COMMAND;
+                }
+            }
             time = 0;
             while ( commandNotDone && (time < 1000) ) ;
             if ( time >= 1000 ) { commandNotDone = false; return true; }
             break;
         case NON_BLOCKING:
-            //STATIC = this;
             wake_io_non_blocking( );
             break;
         default:
@@ -855,6 +874,7 @@ void uart1_isr( void ) {
     uint8_t c;
     
     if ( UART1_S1 & ( UART_S1_RDRF ) ) {
+        if ( !startBit ) startBit = true;
         head = rxHead;
         tail = rxTail;
         n = UART1_D;
@@ -863,6 +883,7 @@ void uart1_isr( void ) {
             head += 1;
             if ( head >= RX_BUFFER_SIZE ) head = 0;
             rx_buffer[head] = n;
+            
             if ( commandNotDone && n == 0x0A ) commandNotDone = false;
             else if ( serviceRequest && n == 0x0A ) serviceRequest = false;
             rxHead = head;
