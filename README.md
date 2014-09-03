@@ -69,7 +69,7 @@ Connect the sensor to teensy using external Vin for sensor power.<br>
                                  -------
 ```
 
-<h2>Usage</h2><br>
+<h2>Library Usage</h2><br>
 <b>Constructor:</b>
 ---
 ```c
@@ -97,7 +97,7 @@ SDI12 DECAGON_5TE_40CM( &Serial3, '4', true );
 ---
 ```c
 //SDI12 (Acknowledge Active) "a!" command.
-bool isActive( int address = -1 );
+int isActive( int address = -1 );
 ```
 >1. ```int address```(optional) = can use other address also.
 
@@ -132,8 +132,8 @@ if( error ) Serial.println( "Sensor at address 5 Not Active" );
 ---
 ```c
 // SDI12 (Send Identification) "aI!" command.
-bool identification( const char *src ) { identification( (const uint8_t *)src ); }
-bool identification( const uint8_t *src );
+int identification( const char *src ) { identification( (const uint8_t *)src ); }
+int identification( const uint8_t *src );
 ```
 >1. ```const (char or uint8_t) *src``` = buffer array you supply to hold returned string.
 
@@ -207,8 +207,8 @@ if( address != -1 ) {
 ---
 ```c
 // SDI12 (Start Verification) "aV!" command.
-bool verification( const char *src ) { verification( (const uint8_t *)src ); }
-bool verification( const uint8_t *src );
+int verification( const char *src ) { verification( (const uint8_t *)src ); }
+int verification( const uint8_t *src );
 ```
 >1. ```const (char or uint8_t) *src``` = buffer array you supply to hold returned string.
 
@@ -234,9 +234,9 @@ if ( !error ) Serial.print( buf );
 ```c
 // SDI12 (Start Measurement) command.
 // "aM!", "aMC!" or "aM0...aM9" or "aMC0...aMC9"
-bool measurement( int num = -1 ) { uint8_t s[75]; measurement( s, num ); }
-bool measurement( const char *src, int num = -1 ) { measurement( (const uint8_t *)src, num ); }
-bool measurement( const uint8_t *src, int num = -1 );
+int measurement( int num = -1 ) { uint8_t s[75]; measurement( s, num ); }
+int measurement( const char *src, int num = -1 ) { measurement( (const uint8_t *)src, num ); }
+int measurement( const uint8_t *src, int num = -1 );
 ```
 >1. ```const (char or uint8_t) *src``` = buffer array you supply to hold acknowledgement string.
 >2. ```int num = -1```(optional) = Additional measurements.
@@ -297,9 +297,9 @@ if ( !error ) Serial.print( data );
 ```c
 // SDI12 (Start Concurrent Measurement) command.
 // "aC!","aCC!" or "aC0...aC9" or "aCC0...aCC9"
-bool concurrent( int num = -1 ) { uint8_t s[75]; concurrent( s, num ); }
-bool concurrent( const char *src, int num = -1 ) { concurrent( (const uint8_t *)src, num ); }
-bool concurrent(  const uint8_t *src, int num  );
+int concurrent( int num = -1 ) { uint8_t s[75]; concurrent( s, num ); }
+int concurrent( const char *src, int num = -1 ) { concurrent( (const uint8_t *)src, num ); }
+int concurrent(  const uint8_t *src, int num  );
 ```
 >1. ```const (char or uint8_t) *src``` = buffer array you supply to hold acknowledgement string.
 >2. ```int num = -1```(optional) = Additional measurements.
@@ -319,8 +319,8 @@ Example:
 ```c
 // SDI12 (Start Continuous Measurement) command.
 // "aR0!...aR9!" or "aRC0!...aRC9!"
-bool continuous( const char *src, int num = -1 ) { continuous( (const uint8_t *)src, num ); }
-bool continuous( const uint8_t *src, int num = -1 );
+int continuous( const char *src, int num = -1 ) { continuous( (const uint8_t *)src, num ); }
+int continuous( const uint8_t *src, int num = -1 );
 ```
 >1. ```const (char or uint8_t) *src``` = buffer array you supply to hold returned string.
 >2. ```int num = -1```(optional) = Additional measurements.
@@ -347,8 +347,8 @@ if ( !error ) Serial.print( data );
 ```c
 // SDI12 (Return Measurement) command.
 // "aD!" or "aD0!...aD9!"
-bool returnMeasurement( const char *src, int num = -1 ) { returnMeasurement( (const uint8_t *)src, num ); }
-bool returnMeasurement( const uint8_t *src, int num = -1 );
+int returnMeasurement( const char *src, int num = -1 ) { returnMeasurement( (const uint8_t *)src, num ); }
+int returnMeasurement( const uint8_t *src, int num = -1 );
 ```
 >1. ```const (char or uint8_t) *src``` = buffer array you supply to hold returned string.
 >2. ```int num = -1```(optional) = Additional measurements.
@@ -363,10 +363,10 @@ Example:
 ---
 ```c
 // SDI12 (Transparent) command. Allows extended SDI12 commands.
-bool transparent( const char *command, const uint8_t *src ) { transparent( (uint8_t*)command, src ); }
-bool transparent( const uint8_t *command, const char *src ) { transparent( command, (uint8_t*)src ); }
-bool transparent( const char *command, const char *src ) { transparent( (uint8_t*)command, (uint8_t*)src ); }
-bool transparent( const uint8_t *command, const uint8_t *src );
+int transparent( const char *command, const uint8_t *src ) { transparent( (uint8_t*)command, src ); }
+int transparent( const uint8_t *command, const char *src ) { transparent( command, (uint8_t*)src ); }
+int transparent( const char *command, const char *src ) { transparent( (uint8_t*)command, (uint8_t*)src ); }
+int transparent( const uint8_t *command, const uint8_t *src );
 ```
 >1. ```const (char or uint8_t) *command``` = SDI12 command to send.
 >2. ```const (char or uint8_t) *src``` = buffer array you supply to hold returned string.
