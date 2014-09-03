@@ -393,4 +393,4 @@ if ( !error ) Serial.print( data );
 [Decagon 5TE]:http://www.decagon.com/products/soils/volumetric-water-content-sensors/5te-vwc-ec-temp/
 [Decagon CTD]:http://www.decagon.com/products/hydrology/water-level-temperature-electrical-conductivity/ctd-5-10-sensor-electrical-conductivity-temperature-depth/
 [Keller DigiLevel]:http://www.kelleramerica.com/blog/?tag=digilevel
-[TXB0104]
+[TXB0104]:http://www.adafruit.com/products/1875
