@@ -6,14 +6,17 @@ SDI12
 <h4>This library implements the SDI12 v1.3 protocol, natively using Teensy's hardware serial one-wire protocol.</h4>
 
 <b>[SDI12 Specification]</b>
-> SDI12 is a single wire serial protocol that uses inverted 5V logic levels, specifically (1200 baud, 7E1) for bi-directional data flow with one Master and many Slaves. This library sets up the Freescale Cortex one-wire protocol for each of its 3 Hardware Serial ports TX pin along with critical timing - Break and Mark signals to wake the sensor bus. This makes effectively 3 separate SDI12 buses that can be used or not. Since SDI12 is Master-Slave, many different types of sensor can share the same bus through the use of unique address for each sensor.
+> SDI12 is a single wire serial protocol that uses inverted 5V logic levels, specifically (1200 baud, 7E1) for bi-directional data flow with one Master and many Slaves. This library sets up the Freescale Cortex one-wire protocol for each of its 3 Hardware Serial ports TX pin along with critical timing - Break and Mark signals to wake the sensor bus. This makes effectively 3 separate SDI12 buses that can be used or not. Since SDI12 is Master-Slave, many different types of sensor can share the same bus through the use of unique address for each sensor.<br>
 
-<br>
+
+<b>Level Shifting</b>
 Since Teensy are 3.3V micrcontrollers it is actually out of SDI12 specification:<br>
 1. Spacing (3.5V to 5V)<br>
 2. Marking (-0.5V to 1V)<br>
 
-Though all the sensors listed below will still work with 3.3V signals. I'm working on proper level shifting to be in spec.
+For proper level shifting found that you can use the Adafruit's Bi-directional Logic Level Converter [TXB0104]. I2C level shifter do not work because of the strong pullups which TXB0104 does not have.
+<br>
+
 
 <b>Sensor Tested:</b>
 >1. [Decagon 5TE]
@@ -390,3 +393,4 @@ if ( !error ) Serial.print( data );
 [Decagon 5TE]:http://www.decagon.com/products/soils/volumetric-water-content-sensors/5te-vwc-ec-temp/
 [Decagon CTD]:http://www.decagon.com/products/hydrology/water-level-temperature-electrical-conductivity/ctd-5-10-sensor-electrical-conductivity-temperature-depth/
 [Keller DigiLevel]:http://www.kelleramerica.com/blog/?tag=digilevel
+[TXB0104]
