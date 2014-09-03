@@ -1,0 +1,62 @@
+/****************************Error Codes*********************/
+-------------------------------------------------------------
+isActive: Error Codes - returns (int)
+ 0 = success 
+-1 = "send_command" error
+-2 = address mismatch, returned address does not match constructor
+-------------------------------------------------------------
+identification: Error Codes - returns (int)
+ 0 = success 
+-1 = "send_command" error
+-------------------------------------------------------------
+changeAddress: Error Codes - returns (int)
++0 = success, returns new address
+-1 = "send_command" error
+-2 = address match, new address is same as constructor
+-3 = address not valid
+-4 = address mismatch, returned address does not match supplied address
+-------------------------------------------------------------
+queryAddress: Error Codes - returns (int)
++0 = success, returns address
+-1 = "send_command" error
+-------------------------------------------------------------
+verification: Error Codes - returns (int)
+ 0 = success 
+-1 = "send_command" error
+-2 = command response address mismatch
+-3 = service request timeout
+-4 = service request address mismatch
+-------------------------------------------------------------
+measurement: Error Codes - returns (int)
+ 0 = success
+-1 = "send_command" error
+-2 = command response address mismatch
+-3 = service request timeout
+-4 = service request address mismatch
+-------------------------------------------------------------
+concurrent: Error Codes - returns (int)
+ 0 = success, returns address. 
+-1 = "send_command" error
+-------------------------------------------------------------
+continuous: Error Codes - returns (int)
+ 0 = success
+-1 = "send_command" error
+-------------------------------------------------------------
+transparent: Error Codes - returns (int)
+ 0 = success
+-1 = "send_command" error
+-2 = service request error if "M" command
+-------------------------------------------------------------
+returnMeasurement: Error Codes - returns (int)
+ 0 = success
+-1 = "send_command" error
+-2 = CRC error
+/****************************Error Codes*********************/
+
+-------------------------------------------------------------
+send_command: Error Codes - returns (int)
+ 0 = Success
+-1 = Command Return Timeout
+-2 = Retry Command Exhausted
+-3 = Command Size > Max Buffer Size
+-------------------------------------------------------------
