@@ -51,8 +51,6 @@ returnMeasurement: Error Codes - returns (int)
  0 = success
 -1 = "send_command" error
 -2 = CRC error
-/****************************Error Codes*********************/
-
 -------------------------------------------------------------
 send_command: Error Codes - returns (int)
  0 = Success
@@ -60,3 +58,4 @@ send_command: Error Codes - returns (int)
 -2 = Retry Command Exhausted
 -3 = Command Size > Max Buffer Size
 -------------------------------------------------------------
+/****************************Error Codes*********************/
