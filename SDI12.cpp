@@ -27,12 +27,14 @@
 
 IntervalTimer     ioTimer;
 
+enum { TRANSMITTING, RECIEVING, RESPONSE };
+
+volatile uint32_t ioCounter;
+volatile uint8_t sensor_depth;
+
 volatile bool     serviceRequest = false;
 volatile bool     commandNotDone = false;
 volatile bool     startBit       = false;
-//volatile bool     nonBlockSend;
-//volatile bool     nonBlockRecieve;
-//volatile bool     nonBlockGetData;
 
 volatile int spot = 0;
 
@@ -97,10 +99,9 @@ int UART::peek( void ) {
 /****************************************************************************/
 /*                                 SDI12                                    */
 /****************************************************************************/
-SDI12  *SDI12::STATIC;
-SDI12::cmd_t SDI12::conncurrent_cmd[];
-int SDI12::cmdHead;
-int SDI12::cmdTail;
+SDI12 *SDI12::CURRENT_CLASS;
+int SDI12::number_of_registered_sensors;
+SDI12::sensor_block_t SDI12::sensor_block[];
 
 void SDI12::init( void ) {
     pinMode(13, OUTPUT);
@@ -108,10 +109,6 @@ void SDI12::init( void ) {
     pinMode(18, OUTPUT);
     pinMode(19, OUTPUT);
     pinMode(20, OUTPUT);
-    RUN_ONCE_BEGIN;
-    cmdHead        = 0;
-    cmdTail        = 0;
-    RUN_ONCE_END;
     int registeredAddress = sensor.address;
     int ascii_numbers    = (registeredAddress >= 0x30) && (registeredAddress <= 0x39);
     int ascii_upper_case = (registeredAddress >= 0x41) && (registeredAddress <= 0x5A);
@@ -283,8 +280,8 @@ void SDI12::begin( void ) {
 
 }
 
-bool SDI12::isActive( int address ) {
-    bool error;
+int SDI12::isActive( int address ) {
+    int error;
     
     uint8_t command[3];
     if ( address == -1 ) command[0] = sensor.address;
@@ -292,17 +289,17 @@ bool SDI12::isActive( int address ) {
     command[1] = '!';
     
     error = send_command( command, 2, BLOCKING );
-    if ( error ) return error;
+    if ( error ) return -1;
     
     uint8_t p[5];
     int i = 0;
     while ( available( ) ) p[i++] = read( );
-    if ( p[0] == sensor.address ) return false;
-    else return true;
+    if ( p[0] == sensor.address ) return 0;
+    else return -2;
 }
 
-bool SDI12::identification( const uint8_t *src ) {
-    bool error;
+int SDI12::identification( const uint8_t *src ) {
+    int error;
     
     uint8_t command[3];
     command[0] = sensor.address;
@@ -310,29 +307,29 @@ bool SDI12::identification( const uint8_t *src ) {
     command[2] = '!';
     
     error = send_command(command, 3, BLOCKING );
-    if ( error ) return error;
+    if ( error ) return -1;
     
     uint8_t *s = ( uint8_t * )src;
     while ( available( ) ) *s++ = read( );
     
-    return false;
+    return 0;
 }
 
 int SDI12::changeAddress( uint8_t new_address ) {
-    if ( new_address == sensor.address ) return -1;
+    int error;
     
-    bool error;
+    if ( new_address == sensor.address ) return -2;
     
     int ascii_numbers    = ( new_address < 0x30 ) || ( new_address > 0x39 );
     int ascii_upper_case = ( new_address < 0x41 ) || ( new_address > 0x5A );
     int ascii_lower_case = ( new_address < 0x61 ) || ( new_address > 0x7A );
 
-    if (ascii_numbers & ascii_lower_case & ascii_upper_case) return -1;
+    if (ascii_numbers & ascii_lower_case & ascii_upper_case) return -3;
     
     int address;
     address = isActive( );
     
-    if ( address == -1 ) return -1;
+    if ( address == -1 ) return -4;
     
     uint8_t command[4];
     command[0] = sensor.address;
@@ -351,7 +348,7 @@ int SDI12::changeAddress( uint8_t new_address ) {
         sensor.address = p[0];
         return p[0];
     }
-    else return -1;
+    else return -4;
 }
 
 int SDI12::queryAddress( void ) {
@@ -371,16 +368,16 @@ int SDI12::queryAddress( void ) {
     return p[0];
 }
 
-bool SDI12::verification( const uint8_t *src ) {
+int SDI12::verification( const uint8_t *src ) {
     uint8_t *s = ( uint8_t * )src;
-    bool error;
+    int error;
     
     uint8_t command[6];
     command[0] = sensor.address;
     command[1] = 'V';
     command[2] = '!';
     error = send_command( command, 3, BLOCKING );
-    if ( error ) return error;
+    if ( error ) return -1;
     
     int timeout = 0;
     int i = 0;
@@ -389,7 +386,7 @@ bool SDI12::verification( const uint8_t *src ) {
     serviceRequest = true;
     while ( available( ) ) *s++ = v_reponse[i++] = read( );
     
-    if ( v_reponse[0] != sensor.address ) return true;
+    if ( v_reponse[0] != sensor.address ) return -2;
     if ( (v_reponse[1] < 0x30) || (v_reponse[1] > 0x39) ) return true;
     if ( (v_reponse[2] < 0x30) || (v_reponse[2] > 0x39) ) return true;
     if ( (v_reponse[3] < 0x30) || (v_reponse[3] > 0x39) ) return true;
@@ -402,18 +399,17 @@ bool SDI12::verification( const uint8_t *src ) {
     elapsedMillis time;
     time = 0;
     while ( serviceRequest ) {
-        if ( time >= timeout ) { serviceRequest = false; return true; }
+        if ( time >= timeout ) { serviceRequest = false; return -3; }
     }
     char service_request[10];
     i = 0;
     while ( available( ) ) *s++ = service_request[i++] = read( );
-    if ( service_request[0] != sensor.address) return true;
-    return false;
+    if ( service_request[0] != sensor.address) return -4;
+    return 0;
 }
 
-bool SDI12::measurement( const uint8_t *src, int num ) {
-    bool error;
-    uint8_t *s = ( uint8_t * )src;
+int SDI12::measurement( const uint8_t *src, int num ) {
+    int error;
     
     uint8_t command[5];
     command[0] = sensor.address;
@@ -423,12 +419,12 @@ bool SDI12::measurement( const uint8_t *src, int num ) {
             command[2]  = 'C';
             command[3]  = '!';
             error = send_command( command, 4, BLOCKING );
-            if ( error ) return error;
+            if ( error ) return -1;
         }
         else {
             command[2]  = '!';
             error = send_command( command, 3, BLOCKING );
-            if ( error ) return error;
+            if ( error ) return -1;
         }
     }
     else {
@@ -437,13 +433,13 @@ bool SDI12::measurement( const uint8_t *src, int num ) {
             command[3]  = 'C';
             command[4]  = '!';
             error = send_command( command, 5, BLOCKING );
-            if ( error ) return error;
+            if ( error ) return -1;
         }
         else {
             command[2]  = num + 0x30;
             command[3]  = '!';
             error = send_command( command, 4, BLOCKING );
-            if ( error ) return error;
+            if ( error ) return -1;
         }
     }
     serviceRequest = true;
@@ -451,10 +447,11 @@ bool SDI12::measurement( const uint8_t *src, int num ) {
     int timeout = 0;
     int i = 0;
     
+    uint8_t *s = ( uint8_t * )src;
     while ( available( ) ) *s++ = m_reponse[i++] = read( );
     
     //Serial.printf("m_responce: %s", m_reponse);
-    if ( m_reponse[0] != sensor.address) return true;
+    if ( m_reponse[0] != sensor.address) return -2;
     if ( (m_reponse[1] < 0x30) || (m_reponse[1] > 0x39) ) return true;
     if ( (m_reponse[2] < 0x30) || (m_reponse[2] > 0x39) ) return true;
     if ( (m_reponse[3] < 0x30) || (m_reponse[3] > 0x39) ) return true;
@@ -467,17 +464,17 @@ bool SDI12::measurement( const uint8_t *src, int num ) {
     elapsedMillis time;
     time = 0;
     while ( serviceRequest ) {
-        if ( time >= timeout ) { serviceRequest = false; return true; }
+        if ( time >= timeout ) { serviceRequest = false; return -3; }
     }
     char service_request[10];
     i = 0;
     while ( available( ) ) *s++ = service_request[i++] = read( );
-    if ( service_request[0] != sensor.address) return true;
+    if ( service_request[0] != sensor.address) return -4;
     //Serial.printf("Service Request: %s\n", service_request);
-    return false;
+    return 0;
 }
 
-bool SDI12::concurrent( const uint8_t *src, int num ) {
+/*bool SDI12::concurrent( const uint8_t *src, int num ) {
     bool error;
     //uint8_t *s = ( uint8_t * )src;
     
@@ -491,8 +488,9 @@ bool SDI12::concurrent( const uint8_t *src, int num ) {
             p->conncurrentCommand[2]  = 'C';
             p->conncurrentCommand[3]  = '!';
             p->Class = this;
-            cmdHead = cmdHead < (10 - 1) ? cmdHead + 1 : 0;
+            //cmdHead = cmdHead < (10 - 1) ? cmdHead + 1 : 0;
             if ( ioActive ) {
+                cmdHead = cmdHead < (10 - 1) ? cmdHead + 1 : 0;
                 return false;
             }
             ioActive = true;
@@ -544,7 +542,7 @@ bool SDI12::concurrent( const uint8_t *src, int num ) {
             return error;
         }
     }
-    /*static int b = 0;
+    static int b = 0;
     if (b >= 5) {
         Serial.println("Commands:");
         int i = 0;
@@ -556,12 +554,143 @@ bool SDI12::concurrent( const uint8_t *src, int num ) {
         }
         b = 0;
     }
-    b++;*/
+    b++;
     //ioActive = false;
+}*/
+
+int SDI12::concurrent( int sen_arg1, int sen_arg2, int sen_arg3, int sen_arg4 ) {
+    /*Serial.println("-----------class blocks------------");
+     Serial.printf("address[0]: %c\n", sensor_block[0].Class->sensor.address);
+     Serial.printf("address[1]: %c\n", sensor_block[1].Class->sensor.address);
+     Serial.printf("address[2]: %c\n", sensor_block[2].Class->sensor.address);
+     Serial.printf("address[3]: %c\n", sensor_block[3].Class->sensor.address);*/
+    int error;
+    int cmd_size;
+    
+    CURRENT_CLASS = sensor_block[0].Class;
+    sensor_depth = number_of_registered_sensors;
+    
+    for ( int i = 0; i < number_of_registered_sensors; i++ ) {
+        bool crc = sensor_block[i].Class->sensor.crc;
+        if (crc) {
+            if (i == 0) {
+                if (sen_arg1) {
+                    sensor_block[0].conncurrentCommand[3] = sen_arg1;
+                    sensor_block[0].conncurrentCommand[4] = '!';
+                    cmd_size = 5;
+                    sensor_block[0].cmdSize = cmd_size;
+                }
+                else {
+                   sensor_block[0].conncurrentCommand[3] = '!';
+                    cmd_size = 4;
+                    sensor_block[0].cmdSize = cmd_size;
+                }
+            }
+            else if (i == 1) {
+                if (sen_arg2) {
+                    sensor_block[1].conncurrentCommand[3] = sen_arg2;
+                    sensor_block[1].conncurrentCommand[4] = '!';
+                    cmd_size = 5;
+                    sensor_block[1].cmdSize = cmd_size;
+                }
+                else {
+                   sensor_block[1].conncurrentCommand[3] = '!';
+                    cmd_size = 4;
+                    sensor_block[1].cmdSize = cmd_size;
+                }
+            }
+            else if (i == 2) {
+                if (sen_arg3) {
+                    sensor_block[2].conncurrentCommand[3] = sen_arg3;
+                    sensor_block[2].conncurrentCommand[4] = '!';
+                    cmd_size = 5;
+                    sensor_block[2].cmdSize = cmd_size;
+                }
+                else {
+                    sensor_block[2].conncurrentCommand[3] = '!';
+                    cmd_size = 4;
+                    sensor_block[2].cmdSize = cmd_size;
+                }
+            }
+            else if ( i == 3) {
+                if (sen_arg4) {
+                    sensor_block[3].conncurrentCommand[3] = sen_arg4;
+                    sensor_block[3].conncurrentCommand[4] = '!';
+                    cmd_size = 5;
+                    sensor_block[3].cmdSize = cmd_size;
+                }
+                else {
+                   sensor_block[3].conncurrentCommand[3] = '!';
+                    cmd_size = 4;
+                    sensor_block[3].cmdSize = cmd_size;
+                }
+            }
+        }
+        else {
+            if (i == 0) {
+                if (sen_arg1) {
+                    sensor_block[0].conncurrentCommand[2] = sen_arg1;
+                    sensor_block[0].conncurrentCommand[3] = '!';
+                    cmd_size = 4;
+                    sensor_block[0].cmdSize = cmd_size;
+                }
+                else {
+                    sensor_block[0].conncurrentCommand[2] = '!';
+                    cmd_size = 3;
+                    sensor_block[0].cmdSize = cmd_size;
+                }
+            }
+            else if (i == 1) {
+                if (sen_arg2) {
+                    sensor_block[1].conncurrentCommand[2] = sen_arg2;
+                    sensor_block[1].conncurrentCommand[3] = '!';
+                    cmd_size = 4;
+                    sensor_block[1].cmdSize = cmd_size;
+                }
+                else {
+                    sensor_block[1].conncurrentCommand[2] = '!';
+                    cmd_size = 3;
+                    sensor_block[1].cmdSize = cmd_size;
+                }
+            }
+            else if (i == 2) {
+                if (sen_arg3) {
+                    sensor_block[2].conncurrentCommand[2] = sen_arg3;
+                    sensor_block[2].conncurrentCommand[3] = '!';
+                    cmd_size = 4;
+                    sensor_block[2].cmdSize = cmd_size;
+                }
+                else {
+                    sensor_block[2].conncurrentCommand[2] = '!';
+                    cmd_size = 3;
+                    sensor_block[2].cmdSize = cmd_size;
+                }
+            }
+            else if ( i == 3) {
+                if (sen_arg4) {
+                    sensor_block[3].conncurrentCommand[2] = sen_arg4;
+                    sensor_block[3].conncurrentCommand[3] = '!';
+                    cmd_size = 4;
+                    sensor_block[3].cmdSize = cmd_size;
+                }
+                else {
+                    sensor_block[3].conncurrentCommand[2] = '!';
+                    cmd_size = 3;
+                    sensor_block[3].cmdSize = cmd_size;
+                }
+            }
+        }
+        //Serial.printf("size: %i | cmd[%i]: %s\n", cmd_size, i, sensor_block[i].conncurrentCommand);
+    }
+    //Serial.println();
+    
+    uint8_t *cmd = sensor_block[0].conncurrentCommand;
+    error = CURRENT_CLASS->send_command( cmd, cmd_size, NON_BLOCKING );
+    if (error) return -1;
 }
 
-bool SDI12::continuous( const uint8_t *src, int num ) {
-    bool error;
+int SDI12::continuous( const uint8_t *src, int num ) {
+    int error;
     
     uint8_t command[6];
     command[0] = sensor.address;
@@ -572,27 +701,27 @@ bool SDI12::continuous( const uint8_t *src, int num ) {
         command[3]  = 'C';
         command[4]  = '!';
         error = send_command( command, 5, BLOCKING );
-        if ( error ) return error;
+        if ( error ) return -1;
     }
     else {
         command[2]  = num + 0x30;
         command[3]  = '!';
         error = send_command( command, 4, BLOCKING );
-        if ( error ) return error;
+        if ( error ) return -1;
     }
     
     uint8_t *s = ( uint8_t * )src;
     while ( available( ) ) *s++ = read( );
-    return false;
+    return 0;
 }
 
-bool SDI12::transparent( const uint8_t *command, const uint8_t *src ) {
-    bool error;
+int SDI12::transparent( const uint8_t *command, const uint8_t *src ) {
+    int error;
     const char *p = ( const char * )command;
     int len = strlen(p);
     
     error = send_command(command, len, BLOCKING );
-    if ( error ) return error;
+    if ( error ) return -1;
     
     uint8_t *s = ( uint8_t * )src;
     while ( available( ) ) *s++ = read( );
@@ -612,15 +741,15 @@ bool SDI12::transparent( const uint8_t *command, const uint8_t *src ) {
         elapsedMillis time;
         time = 0;
         while ( serviceRequest ) {
-            if ( time >= timeout ) { serviceRequest = false; return true; }
+            if ( time >= timeout ) { serviceRequest = false; return -2; }
         }
         while ( available( ) ) *s++ = read( );
     }
-    return false;
+    return 0;
 }
 
-bool SDI12::returnMeasurement( const uint8_t *src, int num ) {
-    bool error;
+int SDI12::returnMeasurement( const uint8_t *src, int num ) {
+    int error;
     uint8_t command[6];
     command[0] = sensor.address;
     command[1] = 'D';
@@ -628,13 +757,13 @@ bool SDI12::returnMeasurement( const uint8_t *src, int num ) {
     if (num < 0) {
         command[2]  = '!';
         error = send_command( command, 3, BLOCKING );
-        if ( error ) return error;
+        if ( error ) return -1;
     }
     else {
         command[2]  = num + 0x30;
         command[3]  = '!';
         error = send_command( command, 4, BLOCKING );
-        if ( error ) return error;
+        if ( error ) return -1;
     }
     
     uint8_t *s = ( uint8_t * )src;
@@ -644,19 +773,20 @@ bool SDI12::returnMeasurement( const uint8_t *src, int num ) {
         error = crc.check( s );
         if ( !error ) {
             //Serial.println("CRC Good");
-            return error;
+            return 0;
         }
         else {
             //Serial.println("CRC Bad");
-            return error;
+            return -2;
         }
     }
-    error = false;
-    return error;
+    return 0;
 }
-//---------------------------------------------private---------------------------------------------
-bool SDI12::send_command( const void *cmd, uint8_t count, uint8_t type ) {
+//---------------------------------------------private-----------------------------------------
 
+int SDI12::send_command( const void *cmd, uint8_t count, uint8_t type ) {
+    if ( count > TX_BUFFER_SIZE ) return 3;
+    
     const uint8_t *p = ( const uint8_t * )cmd;
     commandNotDone = true;
     elapsedMillis time;
@@ -682,7 +812,7 @@ bool SDI12::send_command( const void *cmd, uint8_t count, uint8_t type ) {
             while ( !startBit ) {
                 if (time >= 20) {
                     retry--;
-                    if (retry == 0) break;
+                    if (retry == 0) return 2;
                     if ( txTail - cnt < 0) txTail = (txTail - cnt) + TX_BUFFER_SIZE;
                     else txTail -= cnt;
                     transmitting = true;
@@ -692,15 +822,18 @@ bool SDI12::send_command( const void *cmd, uint8_t count, uint8_t type ) {
             }
             time = 0;
             while ( commandNotDone && (time < 1000) ) ;
-            if ( time >= 1000 ) { commandNotDone = false; return true; }
+            if ( time >= 1000 ) { commandNotDone = false; return 1; }
             break;
         case NON_BLOCKING:
+            spot = TRANSMITTING;
+            ioCounter = 0;
+            sensor_depth--;
             wake_io_non_blocking( );
             break;
         default:
             break;
     }
-    return false;
+    return 0;
 }
 
 void SDI12::wake_io_blocking( void ) {
@@ -716,7 +849,7 @@ void SDI12::wake_io_blocking( void ) {
     delayMicroseconds( 8333 );
 }
 
-bool SDI12::wake_io_non_blocking( void ) {
+int SDI12::wake_io_non_blocking( void ) {
     transmitting = true;
     volatile uint32_t *config;
     config = portConfigRegister( PIN_NUM_TX );
@@ -728,23 +861,71 @@ bool SDI12::wake_io_non_blocking( void ) {
 }
 
 void SDI12::io_break( void ) {
-    cmd_t* p = &conncurrent_cmd[cmdTail];
-    *p->Class->TX_PIN = PORT_PCR_DSE | PORT_PCR_SRE | PORT_PCR_MUX( 3 );
-    p->Class->REG->C3 |= UART_TX_DIR_OUT;
-    //*STATIC->TX_PIN = PORT_PCR_DSE | PORT_PCR_SRE | PORT_PCR_MUX( 3 );
-    //STATIC->REG->C3 |= UART_TX_DIR_OUT;
+    *CURRENT_CLASS->TX_PIN = PORT_PCR_DSE | PORT_PCR_SRE | PORT_PCR_MUX( 3 );
+    CURRENT_CLASS->REG->C3 |= UART_TX_DIR_OUT;
     ioTimer.begin( io_mark, 8333 );
 }
 
 void SDI12::io_mark( void ) {
-    cmd_t* p = &conncurrent_cmd[cmdTail];
     ioTimer.end( );
-    ioTimer.begin( concurrentMeasure, 1000 );
-    p->Class->REG->C2 = C2_TX_ACTIVE;
-    //STATIC->REG->C2 = C2_TX_ACTIVE;
+    ioTimer.begin( concurrentHandle, 1000 );
+    CURRENT_CLASS->REG->C2 = C2_TX_ACTIVE;
 }
 
-void SDI12::concurrentMeasure( void ) {
+void SDI12::concurrentHandle( void ) {
+    ioCounter++;
+    UART uart;
+    int num;
+    switch ( spot ) {
+        case TRANSMITTING:
+            if (transmitting) break;
+            Serial.println("TRANSMITTING DONE!");
+            spot = RECIEVING;
+            break;
+            
+        case RECIEVING:
+            //if (ioCounter <= 50) break;
+            if (ioCounter >= 2000) {
+                ioTimer.end();
+                if (sensor_depth) {
+                    num = number_of_registered_sensors - sensor_depth;
+                    CURRENT_CLASS = sensor_block[num].Class;
+                    const uint8_t *cmd = sensor_block[num].conncurrentCommand;
+                    int size = sensor_block[num].cmdSize;
+                    bool error = CURRENT_CLASS->send_command(cmd , size, NON_BLOCKING );
+                }
+                Serial.println("RECIEVING TIMEOUT!");
+                Serial.println("------------------------------------");
+                break;
+            }
+            if (commandNotDone) break;
+            Serial.print("RECIEVING DONE: ");
+            ioCounter = 0;
+            spot = RESPONSE;
+            break;
+            
+        case RESPONSE:
+            if (ioCounter <= 10) break;
+            ioTimer.end();
+            while ( uart.available( ) ) {
+                Serial.print((char)uart.read( ));
+            }
+            if (sensor_depth) {
+                num = number_of_registered_sensors - sensor_depth;
+                CURRENT_CLASS = sensor_block[num].Class;
+                const uint8_t *cmd = sensor_block[num].conncurrentCommand;
+                int size = sensor_block[num].cmdSize;
+                bool error = CURRENT_CLASS->send_command(cmd , size, NON_BLOCKING );
+            }
+            Serial.println("RESPONSE DONE!");
+            Serial.println("------------------------------------");
+            break;
+            
+        default:
+            break;
+    }
+}
+/*void SDI12::concurrentMeasure( void ) {
     cmd_t* p = &conncurrent_cmd[cmdTail];
     UART uart;
     int i = 0;
@@ -776,44 +957,65 @@ void SDI12::concurrentMeasure( void ) {
             //if ( 0x30 > src[1] > 0x39 ) return true;
             //if ( 0x30 > src[2] > 0x39 ) return true;
             //if ( 0x30 > src[3] > 0x39 ) return true;
-            timeout  = (tmp[1] - 0x30) * 100;
-            timeout += (tmp[2] - 0x30) * 10;
-            timeout += (tmp[3] - 0x30);
-            timeout *= 1000000;
-            Serial.printf("case 2 | Timeout: %i | String Returned: %s", timeout, tmp);
+            p->timeout  = (tmp[1] - 0x30) * 100;
+            p->timeout += (tmp[2] - 0x30) * 10;
+            p->timeout += (tmp[3] - 0x30);
+            p->timeout *= 1000;
+            Serial.printf("case 2 | Timeout: %i | String Returned: %s", p->timeout, tmp);
             spot = 3;
-            ioTimer.begin( concurrentMeasure, timeout );
+            p->timepos = 0;
+            //cmdTail = cmdTail < (10 - 1) ? cmdTail + 1 : 0;
+            ioTimer.begin( concurrentMeasure, 1000 );
             break;
         case 3:
+            if (cmdHead != cmdTail) {
+                ioTimer.end( );
+                Serial.printf("case 3 | cmdHead: %i | cmdTail: %i\n", cmdHead, cmdTail);
+                cmd_t* u = &conncurrent_cmd[cmdTail];
+                spot = 0;
+                Serial.println((char*)u->conncurrentCommand);
+                u->Class->send_command(u->conncurrentCommand, 4, NON_BLOCKING);
+                break;
+                //cmdTail = cmdTail < (10 - 1) ? cmdTail + 1 : 0;
+            }
+            if (p->timepos++ >= p->timeout) {
+                //ioTimer.end( );
+                spot = 4;
+                //ioActive = true;
+                Serial.printf("case 3 | Timeout: %i | Timepos: %i\n", p->timeout, p->timepos);
+            }
+            break;
+        case 4:
             ioTimer.end( );
+            cmdHead = cmdHead < (10 - 1) ? cmdHead + 1 : 0;
             measureCmd[0] = p->Class->sensor.address;
             measureCmd[1] = 'D';
             measureCmd[2] = '0';
             measureCmd[3] = '!';
-            Serial.printf("case 3 | Command: %s\n", measureCmd);
+            Serial.printf("case 4 | Command: %s\n", measureCmd);
             p->Class->send_command(measureCmd, 4, NON_BLOCKING);
-            spot = 4;
-            break;
-        case 4:
-            if ( !transmitting ) {
-                Serial.println("case 4 | Transmitting");
-                spot = 5;
-            }
+            spot = 5;
             break;
         case 5:
-            if ( !commandNotDone  ) {
-                Serial.println("case 5 | Command Done");
+            if ( !transmitting ) {
+                Serial.println("case 5 | Transmitting");
                 spot = 6;
             }
             break;
         case 6:
+            if ( !commandNotDone  ) {
+                Serial.println("case 6 | Command Done");
+                spot = 7;
+            }
+            break;
+        case 7:
             ioTimer.end( );
             cmdTail = cmdTail < (10 - 1) ? cmdTail + 1 : 0;
             i=0;
             while ( uart.available( ) ) {
                 tmp[i++] = uart.read( );
             }
-            Serial.printf("case 6 | head: %i | tail: %i | Data Returned: ", cmdHead, cmdTail);
+            Serial.printf("case 7 | head: %i | tail: %i | Data Returned: ", cmdHead, cmdTail);
             Serial.write(tmp,i);
             Serial.println();
             if ( cmdHead != cmdTail ) {
@@ -828,13 +1030,14 @@ void SDI12::concurrentMeasure( void ) {
         default:
             break;
     }
-}
+}*/
 //---------------------------------------------uart0_isr------------------------------------------
 void uart0_isr( void ) {
     uint32_t head, tail, n;
     uint8_t c;
     
     if ( UART0_S1 & ( UART_S1_RDRF ) ) {
+        if ( !startBit ) startBit = true;
         head = rxHead;
         tail = rxTail;
         n = UART0_D;
@@ -882,7 +1085,6 @@ void uart1_isr( void ) {
             head += 1;
             if ( head >= RX_BUFFER_SIZE ) head = 0;
             rx_buffer[head] = n;
-            
             if ( commandNotDone && n == 0x0A ) commandNotDone = false;
             else if ( serviceRequest && n == 0x0A ) serviceRequest = false;
             rxHead = head;
@@ -909,11 +1111,11 @@ void uart1_isr( void ) {
 }
 //---------------------------------------------uart2_isr------------------------------------------
 void uart2_isr( void ) {
-    //digitalWriteFast(13, HIGH);
     uint32_t head, tail, n;
     uint8_t c;
 
     if ( UART2_S1 & ( UART_S1_RDRF ) ) {
+        if ( !startBit ) startBit = true;
         head = rxHead;
         n = UART2_D;
         if ( n != 0 ) {
@@ -945,6 +1147,5 @@ void uart2_isr( void ) {
         UART2_C3 &= UART_TX_DIR_IN;
         transmitting = false;
     }
-    //digitalWriteFast(13, LOW);
 }
 /****************************************************************************/
