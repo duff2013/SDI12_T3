@@ -24,15 +24,17 @@ verification: Error Codes - returns (int)
  0 = success 
 -1 = "send_command" error
 -2 = command response address mismatch
--3 = service request timeout
--4 = service request address mismatch
+-3 = returned timeout string malformed
+-4 = service request timeout
+-5 = service request address mismatch
 -------------------------------------------------------------
 measurement: Error Codes - returns (int)
  0 = success
 -1 = "send_command" error
 -2 = command response address mismatch
--3 = service request timeout
--4 = service request address mismatch
+-3 = returned timeout string malformed
+-4 = service request timeout
+-5 = service request address mismatch
 -------------------------------------------------------------
 concurrent: Error Codes - returns (int)
  0 = success, returns address. 
@@ -45,7 +47,8 @@ continuous: Error Codes - returns (int)
 transparent: Error Codes - returns (int)
  0 = success
 -1 = "send_command" error
--2 = service request error if "M" command
+-2 = returned timeout string malformed
+-3 = service request timeout if "M" command
 -------------------------------------------------------------
 returnMeasurement: Error Codes - returns (int)
  0 = success
