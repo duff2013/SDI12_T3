@@ -104,16 +104,10 @@ int SDI12::number_of_registered_sensors;
 SDI12::sensor_block_t SDI12::sensor_block[];
 
 void SDI12::init( void ) {
-    pinMode(13, OUTPUT);
-    pinMode(17, OUTPUT);
-    pinMode(18, OUTPUT);
-    pinMode(19, OUTPUT);
-    pinMode(20, OUTPUT);
     int registeredAddress = sensor.address;
-    int ascii_numbers    = (registeredAddress >= 0x30) && (registeredAddress <= 0x39);
-    int ascii_upper_case = (registeredAddress >= 0x41) && (registeredAddress <= 0x5A);
-    int ascii_lower_case = (registeredAddress >= 0x61) && (registeredAddress <= 0x7A);
-    
+    //int ascii_numbers    = (registeredAddress >= 0x30) && (registeredAddress <= 0x39);
+    //int ascii_upper_case = (registeredAddress >= 0x41) && (registeredAddress <= 0x5A);
+    //int ascii_lower_case = (registeredAddress >= 0x61) && (registeredAddress <= 0x7A);
     
     if ( sensor.uart == &Serial1 ) {
         RUN_ONCE_BEGIN;
@@ -387,9 +381,9 @@ int SDI12::verification( const uint8_t *src ) {
     while ( available( ) ) *s++ = v_reponse[i++] = read( );
     
     if ( v_reponse[0] != sensor.address ) return -2;
-    if ( (v_reponse[1] < 0x30) || (v_reponse[1] > 0x39) ) return true;
-    if ( (v_reponse[2] < 0x30) || (v_reponse[2] > 0x39) ) return true;
-    if ( (v_reponse[3] < 0x30) || (v_reponse[3] > 0x39) ) return true;
+    if ( (v_reponse[1] < 0x30) || (v_reponse[1] > 0x39) ) return -3;
+    if ( (v_reponse[2] < 0x30) || (v_reponse[2] > 0x39) ) return -3;
+    if ( (v_reponse[3] < 0x30) || (v_reponse[3] > 0x39) ) return -3;
     timeout  = ( v_reponse[1] - 0x30 ) * 100;
     timeout += ( v_reponse[2] - 0x30 ) * 10;
     timeout += ( v_reponse[3] - 0x30 );
@@ -399,12 +393,12 @@ int SDI12::verification( const uint8_t *src ) {
     elapsedMillis time;
     time = 0;
     while ( serviceRequest ) {
-        if ( time >= timeout ) { serviceRequest = false; return -3; }
+        if ( time >= timeout ) { serviceRequest = false; return -4; }
     }
     char service_request[10];
     i = 0;
     while ( available( ) ) *s++ = service_request[i++] = read( );
-    if ( service_request[0] != sensor.address) return -4;
+    if ( service_request[0] != sensor.address) return -5;
     return 0;
 }
 
@@ -449,12 +443,11 @@ int SDI12::measurement( const uint8_t *src, int num ) {
     
     uint8_t *s = ( uint8_t * )src;
     while ( available( ) ) *s++ = m_reponse[i++] = read( );
-    
-    //Serial.printf("m_responce: %s", m_reponse);
+
     if ( m_reponse[0] != sensor.address) return -2;
-    if ( (m_reponse[1] < 0x30) || (m_reponse[1] > 0x39) ) return true;
-    if ( (m_reponse[2] < 0x30) || (m_reponse[2] > 0x39) ) return true;
-    if ( (m_reponse[3] < 0x30) || (m_reponse[3] > 0x39) ) return true;
+    if ( (m_reponse[1] < 0x30) || (m_reponse[1] > 0x39) ) return -3;
+    if ( (m_reponse[2] < 0x30) || (m_reponse[2] > 0x39) ) return -3;
+    if ( (m_reponse[3] < 0x30) || (m_reponse[3] > 0x39) ) return -3;
     timeout  = ( m_reponse[1] - 0x30 ) * 100;
     timeout += ( m_reponse[2] - 0x30 ) * 10;
     timeout += ( m_reponse[3] - 0x30 );
@@ -464,99 +457,14 @@ int SDI12::measurement( const uint8_t *src, int num ) {
     elapsedMillis time;
     time = 0;
     while ( serviceRequest ) {
-        if ( time >= timeout ) { serviceRequest = false; return -3; }
+        if ( time >= timeout ) { serviceRequest = false; return -4; }
     }
     char service_request[10];
     i = 0;
     while ( available( ) ) *s++ = service_request[i++] = read( );
-    if ( service_request[0] != sensor.address) return -4;
-    //Serial.printf("Service Request: %s\n", service_request);
+    if ( service_request[0] != sensor.address) return -5;
     return 0;
 }
-
-/*bool SDI12::concurrent( const uint8_t *src, int num ) {
-    bool error;
-    //uint8_t *s = ( uint8_t * )src;
-    
-    cmd_t* p = &conncurrent_cmd[cmdHead];
-    //Serial.printf("\nhead: %i | tail: %i\n", cmdHead, cmdTail);
-    
-    if (num < 0) {
-        if (sensor.crc) {
-            p->conncurrentCommand[0]  = sensor.address;
-            p->conncurrentCommand[1]  = 'C';
-            p->conncurrentCommand[2]  = 'C';
-            p->conncurrentCommand[3]  = '!';
-            p->Class = this;
-            //cmdHead = cmdHead < (10 - 1) ? cmdHead + 1 : 0;
-            if ( ioActive ) {
-                cmdHead = cmdHead < (10 - 1) ? cmdHead + 1 : 0;
-                return false;
-            }
-            ioActive = true;
-            error = send_command( p->conncurrentCommand, 4, NON_BLOCKING );
-            return error;
-        }
-        else {
-            p->conncurrentCommand[0]  = sensor.address;
-            p->conncurrentCommand[1]  = 'C';
-            p->conncurrentCommand[2]  = '!';
-            p->Class = this;
-            cmdHead = cmdHead < (10 - 1) ? cmdHead + 1 : 0;
-            if ( ioActive ) {
-                return false;
-            }
-            ioActive = true;
-            error = send_command( p->conncurrentCommand, 3, NON_BLOCKING );
-            return error;
-        }
-    }
-    else {
-        if (sensor.crc) {
-            p->conncurrentCommand[0]  = sensor.address;
-            p->conncurrentCommand[1]  = 'C';
-            p->conncurrentCommand[2]  = num + 0x30;
-            p->conncurrentCommand[3]  = 'C';
-            p->conncurrentCommand[4]  = '!';
-            p->Class = this;
-            cmdHead = cmdHead < (10 - 1) ? cmdHead + 1 : 0;
-            if ( ioActive ) {
-                return false;
-            }
-            ioActive = true;
-            error = send_command( p->conncurrentCommand, 5, NON_BLOCKING );
-            return error;
-        }
-        else {
-            p->conncurrentCommand[0]  = sensor.address;
-            p->conncurrentCommand[1]  = 'C';
-            p->conncurrentCommand[2]  = num + 0x30;
-            p->conncurrentCommand[3]  = '!';
-            p->Class = this;
-            cmdHead = cmdHead < (10 - 1) ? cmdHead + 1 : 0;
-            if ( ioActive ) {
-                return false;
-            }
-            ioActive = true;
-            error = send_command( p->conncurrentCommand, 4, NON_BLOCKING );
-            return error;
-        }
-    }
-    static int b = 0;
-    if (b >= 5) {
-        Serial.println("Commands:");
-        int i = 0;
-        while (cmdHead != cmdTail) {
-            //for (int i = 0; i<10; i++) {
-            cmd_t* p = &conncurrent_cmd[cmdTail];
-            Serial.println((char *)p->conncurrentCommand);
-            cmdTail = cmdTail < (10 - 1) ? cmdTail + 1 : 0;
-        }
-        b = 0;
-    }
-    b++;
-    //ioActive = false;
-}*/
 
 int SDI12::concurrent( int sen_arg1, int sen_arg2, int sen_arg3, int sen_arg4 ) {
     /*Serial.println("-----------class blocks------------");
@@ -729,10 +637,10 @@ int SDI12::transparent( const uint8_t *command, const uint8_t *src ) {
     if ( command[1] == 'M' ) {
         serviceRequest = true;
         int timeout = 0;
-        if ( src[0] != command[0])  return true;
-        if ( 0x30 > src[1] > 0x39 ) return true;
-        if ( 0x30 > src[2] > 0x39 ) return true;
-        if ( 0x30 > src[3] > 0x39 ) return true;
+        if ( src[0] != command[0])  return -2;
+        if ( 0x30 > src[1] > 0x39 ) return -2;
+        if ( 0x30 > src[2] > 0x39 ) return -2;
+        if ( 0x30 > src[3] > 0x39 ) return -2;
         timeout  = (src[1] - 0x30) * 100;
         timeout += (src[2] - 0x30) * 10;
         timeout += (src[3] - 0x30);
@@ -741,7 +649,7 @@ int SDI12::transparent( const uint8_t *command, const uint8_t *src ) {
         elapsedMillis time;
         time = 0;
         while ( serviceRequest ) {
-            if ( time >= timeout ) { serviceRequest = false; return -2; }
+            if ( time >= timeout ) { serviceRequest = false; return -3; }
         }
         while ( available( ) ) *s++ = read( );
     }
@@ -785,7 +693,7 @@ int SDI12::returnMeasurement( const uint8_t *src, int num ) {
 //---------------------------------------------private-----------------------------------------
 
 int SDI12::send_command( const void *cmd, uint8_t count, uint8_t type ) {
-    if ( count > TX_BUFFER_SIZE ) return 3;
+    if ( count > TX_BUFFER_SIZE ) return -1;
     
     const uint8_t *p = ( const uint8_t * )cmd;
     commandNotDone = true;
@@ -812,7 +720,7 @@ int SDI12::send_command( const void *cmd, uint8_t count, uint8_t type ) {
             while ( !startBit ) {
                 if (time >= 20) {
                     retry--;
-                    if (retry == 0) return 2;
+                    if (retry == 0) return -2;
                     if ( txTail - cnt < 0) txTail = (txTail - cnt) + TX_BUFFER_SIZE;
                     else txTail -= cnt;
                     transmitting = true;
@@ -822,7 +730,7 @@ int SDI12::send_command( const void *cmd, uint8_t count, uint8_t type ) {
             }
             time = 0;
             while ( commandNotDone && (time < 1000) ) ;
-            if ( time >= 1000 ) { commandNotDone = false; return 1; }
+            if ( time >= 1000 ) { commandNotDone = false; return -3; }
             break;
         case NON_BLOCKING:
             spot = TRANSMITTING;
