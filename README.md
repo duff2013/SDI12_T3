@@ -14,7 +14,7 @@ SDI12
 1. Spacing (3.5V to 5V)<br>
 2. Marking (-0.5V to 1V)<br>
 
->For proper level shifting found that you can use the Adafruit's Bi-directional Logic Level Converter [TXB0104]. I2C level shifter do not work because of the strong pullups which TXB0104 does not have.
+>For proper level shifting I found that you can use the Adafruit's Bi-directional Logic Level Converter [TXB0104]. I2C level shifters do not work because of the strong pullups which TXB0104 does not have.
 <br>
 
 
@@ -24,7 +24,7 @@ SDI12
 >3. [Keller DigiLevel]
 >4. [Vaisala WXT520]
 
-<b>Hookup</b>
+<b>Hookup:</b>
 >1. Teensy 3.0 are not 5V tolerant, put a resistor inlined with the data line.<br>
 >2. Teensy 3.1 is 5V tolerant so direct connection can be done.<br>
 >3. While SDI12 specification states 12V is used for power, many sensors use a range of values (5-17V).<br>
