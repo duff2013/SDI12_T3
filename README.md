@@ -24,12 +24,12 @@ SDI-12
 >3. [Keller DigiLevel]
 >4. [Vaisala WXT520]
 
-<b>Hookup:</b>
+<b>Hookup - No Level Shifter:</b>
 >1. Teensy 3.0 are not 5V tolerant, put a resistor inlined with the data line.<br>
 >2. Teensy 3.1 is 5V tolerant so direct connection can be done.<br>
 >3. While SDI12 specification states 12V is used for power, many sensors use a range of values (5-17V).<br>
 
-Connect the sensor to teensy using Teensy's Vin (5V) for sensor power.<br>
+Connect the sensor to Teensy using Teensy's Vin (5V) for sensor power.<br>
 ```
   Teensy 3.0                                                   Sensor
  ----------------                                           -------------  
@@ -45,7 +45,7 @@ Connect the sensor to teensy using Teensy's Vin (5V) for sensor power.<br>
 |       Vin      |---------------------------------------->|    Power    |
  ----------------                                           -------------
 ```
-Connect the sensor to teensy using external Vin for sensor power.<br>
+Connect the sensor to Teensy using external Vin for sensor power.<br>
 ```
   Teensy 3.0                                                   Sensor
  ----------------                                           -------------  
@@ -68,7 +68,47 @@ Connect the sensor to teensy using external Vin for sensor power.<br>
                                 | Power |--------|
                                  -------
 ```
-
+<b>Hookup - Level Shifter:</b>
+Connect a sensor using level shifter and Teensy's Vin for sensor power.<br>
+```
+                                _TXB0104__
+                    |--------->|A1      B1|<-----|
+                    | |------->|GND    GND|<---| |
+                    | | |----->|3.3V    5V|<-| | |
+                    | | | |--->|OE      OE|X | | |
+                    | | | |     ----------   | | |
+    Teensy 3.x      | | | |                  | | |               Sensor
+ ----------------   | | | |                  | | |           -------------
+| Serial Port TX |<-| | | |                  | | |--------->|    Data     |
+|       GND      |<---| | |                  | |------------|    GND      |
+|       3.3V     |------| |                  |           |->|    Power    |
+|       DIG PIN  |--------|                  |           |   -------------
+|       Vin      |---------------------------*-----------|
+ ----------------
+```
+Connect a sensor using level shifter using Ext Vin for sensor power.<br>
+```
+                                _TXB0104__
+                    |--------->|A1      B1|<---|
+                    | |------->|GND    GND|X   |
+                    | | |----->|3.3V    5V|<-| |
+                    | | | |--->|OE        |X | |
+                    | | | |     ----------   | |
+    Teensy 3.x      | | | |                  | |               Sensor
+ ----------------   | | | |                  | |           -------------
+| Serial Port TX |<-| | | |                  | |--------->|    Data     |
+|       GND      |<---| | |                  |       |----|    GND      |
+|       3.3V     |------| |                  |       | |--|    Power    |
+|       DIG PIN  |--------|                  |       | |   -------------
+|       Vin      |---------------------------|       | |
+|       GND      |-----------|                       | |
+ ----------------            |                       | |
+                             | External Power        | |
+                             |   -------             | |
+                             |->|  GND  |<-----------| |
+                                |  PWR  |<-------------|
+                                 -------
+```
 <h2>Library Usage</h2><br>
 <b>Constructor:</b>
 ---
