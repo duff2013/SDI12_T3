@@ -39,17 +39,17 @@
 
 class SDI12;
 
-//---------------------------------------------------------------------------------------------
+//-------------------------------------------UART----------------------------------------------
 class UART {
 public:
     UART( void ) :
-        REG(nullptr),
-        TX_PIN(nullptr),
-        RX_PIN(nullptr),
-        SET(nullptr),
-        CLEAR(nullptr),
-        PIN_NUM_RX(NULL),
-        PIN_NUM_TX(NULL)
+        REG( nullptr ),
+        TX_PIN( nullptr ),
+        RX_PIN( nullptr ),
+        SET( nullptr ),
+        CLEAR( nullptr ),
+        PIN_NUM_RX( NULL ),
+        PIN_NUM_TX( NULL )
     {
 
     }
@@ -72,21 +72,23 @@ private:
     uint8_t           PIN_NUM_RX;
     uint8_t           PIN_NUM_TX;
 };
-//---------------------------------------------------------------------------------------------
+//------------------------------------------SDI12-----------------------------------------------
 class SDI12 : public UART {
-    typedef struct __attribute__((packed)) {
+    /*typedef struct __attribute__( (packed) ) {
         Stream *uart;
-        uint32_t timeout;
         uint8_t address;
         bool crc;
-    } sdi12_t;
+    } sdi12_t;*/
     
     typedef struct {
+        Stream *uart;
         uint8_t conncurrentCommand[5];
         uint8_t conncurentData[82];
         volatile uint8_t  cmdSize;
         volatile uint32_t timeout;
         volatile uint32_t timepos;
+        uint8_t address;
+        bool crc;
         SDI12 *Class;
     } sensor_block_t;
     
@@ -105,7 +107,7 @@ public:
         releaseVector( );
     }
     
-    SDI12 & operator () ( SDI12 &ref1 ) {
+    SDI12 & operator ( ) ( SDI12 &ref1 ) {
         sensor_block[0].Class = &ref1;
         sensor_block[1].Class = nullptr;
         sensor_block[2].Class = nullptr;
@@ -113,12 +115,12 @@ public:
         
         sensor_block[0].conncurrentCommand[0] = ref1.sensor.address;
         sensor_block[0].conncurrentCommand[1] = 'C';
-        if (ref1.sensor.crc) sensor_block[0].conncurrentCommand[2] = 'C';
+        if ( ref1.sensor.crc ) sensor_block[0].conncurrentCommand[2] = 'C';
         
         number_of_registered_sensors = 1;
     }
     
-    SDI12 & operator () ( SDI12 &ref1, SDI12 &ref2 ) {
+    SDI12 & operator ( ) ( SDI12 &ref1, SDI12 &ref2 ) {
         sensor_block[0].Class = &ref1;
         sensor_block[1].Class = &ref2;
         sensor_block[2].Class = nullptr;
@@ -126,16 +128,16 @@ public:
         
         sensor_block[0].conncurrentCommand[0] = ref1.sensor.address;
         sensor_block[0].conncurrentCommand[1] = 'C';
-        if (ref1.sensor.crc) sensor_block[0].conncurrentCommand[2] = 'C';
+        if ( ref1.sensor.crc ) sensor_block[0].conncurrentCommand[2] = 'C';
         
         sensor_block[1].conncurrentCommand[0] = ref2.sensor.address;
         sensor_block[1].conncurrentCommand[1] = 'C';
-        if (ref2.sensor.crc) sensor_block[1].conncurrentCommand[2] = 'C';
+        if ( ref2.sensor.crc ) sensor_block[1].conncurrentCommand[2] = 'C';
         
         number_of_registered_sensors = 2;
     }
     
-    SDI12 & operator () ( SDI12 &ref1, SDI12 &ref2, SDI12 &ref3 ) {
+    SDI12 & operator ( ) ( SDI12 &ref1, SDI12 &ref2, SDI12 &ref3 ) {
         sensor_block[0].Class = &ref1;
         sensor_block[1].Class = &ref2;
         sensor_block[2].Class = &ref3;
@@ -143,15 +145,15 @@ public:
         
         sensor_block[0].conncurrentCommand[0] = ref1.sensor.address;
         sensor_block[0].conncurrentCommand[1] = 'C';
-        if (ref1.sensor.crc) sensor_block[0].conncurrentCommand[2] = 'C';
+        if ( ref1.sensor.crc ) sensor_block[0].conncurrentCommand[2] = 'C';
         
         sensor_block[1].conncurrentCommand[0] = ref2.sensor.address;
         sensor_block[1].conncurrentCommand[1] = 'C';
-        if (ref1.sensor.crc) sensor_block[1].conncurrentCommand[2] = 'C';
+        if ( ref2.sensor.crc ) sensor_block[1].conncurrentCommand[2] = 'C';
         
         sensor_block[2].conncurrentCommand[0] = ref3.sensor.address;
         sensor_block[2].conncurrentCommand[1] = 'C';
-        if (ref1.sensor.crc) sensor_block[2].conncurrentCommand[2] = 'C';
+        if ( ref3.sensor.crc ) sensor_block[2].conncurrentCommand[2] = 'C';
         
         number_of_registered_sensors = 3;
     }
@@ -164,40 +166,22 @@ public:
         
         sensor_block[0].conncurrentCommand[0] = ref1.sensor.address;
         sensor_block[0].conncurrentCommand[1] = 'C';
-        if (ref1.sensor.crc) sensor_block[0].conncurrentCommand[2] = 'C';
+        if ( ref1.sensor.crc ) sensor_block[0].conncurrentCommand[2] = 'C';
         
         sensor_block[1].conncurrentCommand[0] = ref2.sensor.address;
         sensor_block[1].conncurrentCommand[1] = 'C';
-        if (ref1.sensor.crc) sensor_block[1].conncurrentCommand[2] = 'C';
+        if ( ref2.sensor.crc ) sensor_block[1].conncurrentCommand[2] = 'C';
         
         sensor_block[2].conncurrentCommand[0] = ref3.sensor.address;
         sensor_block[2].conncurrentCommand[1] = 'C';
-        if (ref1.sensor.crc) sensor_block[2].conncurrentCommand[2] = 'C';
+        if ( ref3.sensor.crc ) sensor_block[2].conncurrentCommand[2] = 'C';
         
         sensor_block[3].conncurrentCommand[0] = ref4.sensor.address;
         sensor_block[3].conncurrentCommand[1] = 'C';
-        if (ref1.sensor.crc) sensor_block[3].conncurrentCommand[2] = 'C';
+        if ( ref4.sensor.crc ) sensor_block[3].conncurrentCommand[2] = 'C';
         
         number_of_registered_sensors = 4;
-        //Serial.println("ref4");
     }
-    
-    /*const SDI12 & operator = ( const SDI12 &rhs ) {
-        this->sensor.uart    = rhs.sensor.uart;
-        this->sensor.timeout = rhs.sensor.timeout;
-        this->sensor.address = rhs.sensor.address;
-        this->sensor.crc     = rhs.sensor.crc;
-        this->REG            = rhs.REG;
-        this->RX_PIN         = rhs.RX_PIN;
-        this->TX_PIN         = rhs.TX_PIN;
-        this->SET            = rhs.SET;
-        this->CLEAR          = rhs.CLEAR;
-        this->BITMASK        = rhs.BITMASK;
-        this->PIN_NUM_RX     = rhs.PIN_NUM_RX;
-        this->PIN_NUM_TX     = rhs.PIN_NUM_TX;
-        //sensor_block[class_count++].Class = this;
-        return *this;
-    }*/
     
     void begin             ( uint32_t sample_rate, char command );
     void begin             ( void );
@@ -211,11 +195,6 @@ public:
     int  measurement       ( int num = -1 ) { uint8_t s[75]; return measurement( s, num ); }
     int  measurement       ( const char *src, int num = -1 ) { return measurement( (const uint8_t *)src, num ); }
     int  measurement       ( const uint8_t *src, int num = -1 );
-    
-    //bool concurrent        ( int num = -1 ) { uint8_t s[75]; return concurrent( s, num ); }
-    //bool concurrent        ( const char *src, int num = -1 ) { return concurrent( (const uint8_t *)src, num ); }
-    //bool concurrent        ( const uint8_t *src, int num  );
-    
     int  continuous        ( const char *src, int num = -1 ) { return continuous( (const uint8_t *)src, num ); }
     int  continuous        ( const uint8_t *src, int num = -1 );
     int  returnMeasurement ( const char *src, int num = -1 ) { return returnMeasurement( (const uint8_t *)src, num ); }
@@ -230,7 +209,7 @@ private:
     static SDI12 *CURRENT_CLASS;
     static int number_of_registered_sensors;
     static sensor_block_t sensor_block[4];
-    sdi12_t sensor;
+    sensor_block_t sensor;
     
     void init                    ( void );
     void allocateVector          ( void );
@@ -241,7 +220,7 @@ private:
     
     static void io_break         ( void );
     static void io_mark          ( void );
-    static void concurrentHandle ( void );
+    static void concurrentMeasure( void );
     static void concurrentData   ( void );
 };
 //-----------------------------------------------------------------------------------------------
