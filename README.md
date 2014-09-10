@@ -1,9 +1,9 @@
-SDI12
+SDI-12
 =========
 
-<h3>Teensy 3.x SDI12 Library V1</h3>
+<h3>Teensy 3.x SDI-12 Library V1</h3>
 
-<h4>This library implements the SDI12 v1.3 protocol, natively using Teensy's hardware serial one-wire protocol.</h4>
+<h4>This library implements the SDI-12 v1.3 protocol, natively using Teensy's hardware serial one-wire protocol.</h4>
 
 <b>[SDI12 Specification]</b>
 > SDI12 is a single wire serial protocol that uses inverted 5V logic levels, specifically (1200 baud, 7E1) for bi-directional data flow with one Master and many Slaves. This library sets up the Freescale Cortex one-wire protocol for each of its 3 Hardware Serial ports TX pin along with critical timing - Break and Mark signals to wake the sensor bus. This makes effectively 3 separate SDI12 buses that can be used or not. Since SDI12 is Master-Slave, many different types of sensor can share the same bus through the use of unique address for each sensor.<br>
@@ -14,7 +14,7 @@ SDI12
 1. Spacing (3.5V to 5V)<br>
 2. Marking (-0.5V to 1V)<br>
 
->For proper level shifting I found that you can use the Adafruit's Bi-directional Logic Level Converter [TXB0104]. I2C level shifters do not work because of the strong pullups which TXB0104 does not have.
+>For proper level shifting I found that you can use the Adafruit's Bi-directional Logic Level Converter [TXB0104]. I2C level shifters do not work because of the strong pullups which [TXB0104] does not have.
 <br>
 
 
