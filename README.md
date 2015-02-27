@@ -1,7 +1,9 @@
 SDI-12
 =========
 
-<h3>Teensy 3.x SDI-12 Library V1</h3>
+<h3>Teensy 3.x SDI-12 Library V2</h3>
+
+<h4>Update!!! 02/26/15 - Now much more stable and TeensyLC compatible. </h4>
 
 <h4>This library implements the SDI-12 v1.3 protocol, natively using Teensy's hardware serial one-wire protocol.</h4>
 
@@ -14,7 +16,7 @@ SDI-12
 1. Spacing (3.5V to 5V)<br>
 2. Marking (-0.5V to 1V)<br>
 
->For proper level shifting I found that you can use the Adafruit's Bi-directional Logic Level Converter [TXB0104]. I2C level shifters do not work because of the strong pullups which [TXB0104] does not have.
+>For proper level shifting I found that you can use the Adafruit's Bi-directional Logic Level Converter [TXB0104]. I2C level shifters do not work because of their 'open-drain the' [TXB0104] uses 'push-pull'.
 <br>
 
 
@@ -75,7 +77,7 @@ Connect a sensor using level shifter and Teensy's Vin for sensor power.<br>
                     |--------->|A1      B1|<-----|
                     | |------->|GND    GND|<---| |
                     | | |----->|3.3V    5V|<-| | |
-                    | | | |--->|OE      OE|X | | |
+                    | | | |--->|OE        |X | | |
                     | | | |     ----------   | | |
     Teensy 3.x      | | | |                  | | |               Sensor
  ----------------   | | | |                  | | |           -------------
@@ -337,21 +339,24 @@ if ( !error ) Serial.print( data );
 ```c
 // SDI12 (Start Concurrent Measurement) command.
 // "aC!","aCC!" or "aC0...aC9" or "aCC0...aCC9"
-int concurrent( int num = -1 ) { uint8_t s[75]; concurrent( s, num ); }
-int concurrent( const char *src, int num = -1 ) { concurrent( (const uint8_t *)src, num ); }
-int concurrent(  const uint8_t *src, int num  );
+int  concurrent( int num = -1 ) { uint8_t s[75]; return concurrent( s, num ); }
+int  concurrent( const char *src, int num = -1 ) { return concurrent( (const uint8_t * )src, num ); }
+int  concurrent( const uint8_t *src, int num = -1 ) ;
 ```
 >1. ```const (char or uint8_t) *src``` = buffer array you supply to hold acknowledgement string.
 >2. ```int num = -1```(optional) = Additional measurements.
 
 Example:
 ```c
-// Not implemented yet... 
-/* 
- * This function will provide a non blocking way to read sensors.
- * This will be the function used in "Background Mode" where 
- * sensors can be logged automatically.
- */
+memset( data, 0, 81 );
+memset( debug, 0, 10 );
+// Function to tell sensor to make a measurement.
+// optional additional measurements command.
+/***error = DECAGON_5TE_40CM.concurrent( debug, 0 );***/
+error = DECAGON_5TE_40CM.concurrent( debug );
+if ( !error ) Serial.print( debug );
+error = DECAGON_5TE_40CM.returnMeasurement( data, 0 );
+if ( !error ) Serial.print( data );
 ```
 
 <br><b>continuous:</b>

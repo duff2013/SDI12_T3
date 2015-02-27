@@ -1,7 +1,7 @@
 /*
  ||
  || @file 		CRC.h
- || @version 	1
+ || @version 	2
  || @author 	Colin Duffy, Mike Jablonski
  || @contact 	cmduffy@engr.psu.edu
  ||
@@ -18,7 +18,7 @@
  || #
  ||
  || @license
- || | Copyright (c) 2014 Colin Duffy
+ || | Copyright (c) 2015 Colin Duffy
  || | This library is free software; you can redistribute it and/or
  || | modify it under the terms of the GNU Lesser General Public
  || | License as published by the Free Software Foundation; version
@@ -50,11 +50,9 @@
 
 class CRC {
 public:
-    CRC();
-    ~CRC();
-    
+    CRC( void );
+    ~CRC( void );
     uint8_t asciiCRC[4];
-    
     unsigned short sdi12_crc;
     // This is a 16 bit unsigned integer. Depending on
     // your compiler the type for an unsigned 16 bit integer
@@ -63,7 +61,6 @@ public:
     // This variable, and other other instances of
     // "unsigned short" in this class, must be 16 bit
     // unsigned integers.
-    
     void append ( uint8_t *s );
     int  check  ( uint8_t *s );
 private:
@@ -71,7 +68,6 @@ private:
     // 75 chars in the <values> part of the the command + addr + crc1 + crc2 + crc3 +
     // carriage return + line feed = 81, + null terminator = 82
     static const int MAX_D_COMMAND_RESPONSE_SIZE = 82;
-    
     void appendAscii    ( uint8_t *s );
     void appendCRLF     ( uint8_t *s );
     void asciiToShort   ( void );

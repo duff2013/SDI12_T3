@@ -1,7 +1,7 @@
 /*
  ||
  || @file 	SDI12.h
- || @version 	1
+ || @version 	2
  || @author 	Colin Duffy
  || @contact 	cmduffy@engr.psu.edu
  ||
@@ -10,7 +10,7 @@
  || #
  ||
  || @license
- || | Copyright (c) 2014 Colin Duffy
+ || | Copyright (c) 2015 Colin Duffy
  || | This library is free software; you can redistribute it and/or
  || | modify it under the terms of the GNU Lesser General Public
  || | License as published by the Free Software Foundation; version
@@ -48,8 +48,8 @@ public:
         RX_PIN( nullptr ),
         SET( nullptr ),
         CLEAR( nullptr ),
-        PIN_NUM_RX( NULL ),
-        PIN_NUM_TX( NULL )
+        PIN_NUM_RX( 0 ),
+        PIN_NUM_TX( 0 )
     {
 
     }
@@ -74,154 +74,53 @@ private:
 };
 //------------------------------------------SDI12-----------------------------------------------
 class SDI12 : public UART {
-    /*typedef struct __attribute__( (packed) ) {
-        Stream *uart;
-        uint8_t address;
-        bool crc;
-    } sdi12_t;*/
-    
+private:
     typedef struct {
         Stream *uart;
-        uint8_t conncurrentCommand[5];
-        uint8_t conncurentData[82];
-        volatile uint8_t  cmdSize;
-        volatile uint32_t timeout;
-        volatile uint32_t timepos;
         uint8_t address;
         bool crc;
-        SDI12 *Class;
     } sensor_block_t;
-    
 public:
-    SDI12( void ) { }
-    
-    SDI12( Stream *port, char address, bool crc = false ) {
+    SDI12( Stream *port, const uint8_t address, bool crc = false ) {
         sensor.uart = port;
         sensor.address = address;
         sensor.crc = crc;
         init( );
         allocateVector( );
     }
-    
-    ~SDI12( void ) {
-        releaseVector( );
-    }
-    
-    SDI12 & operator ( ) ( SDI12 &ref1 ) {
-        sensor_block[0].Class = &ref1;
-        sensor_block[1].Class = nullptr;
-        sensor_block[2].Class = nullptr;
-        sensor_block[3].Class = nullptr;
-        
-        sensor_block[0].conncurrentCommand[0] = ref1.sensor.address;
-        sensor_block[0].conncurrentCommand[1] = 'C';
-        if ( ref1.sensor.crc ) sensor_block[0].conncurrentCommand[2] = 'C';
-        
-        number_of_registered_sensors = 1;
-    }
-    
-    SDI12 & operator ( ) ( SDI12 &ref1, SDI12 &ref2 ) {
-        sensor_block[0].Class = &ref1;
-        sensor_block[1].Class = &ref2;
-        sensor_block[2].Class = nullptr;
-        sensor_block[3].Class = nullptr;
-        
-        sensor_block[0].conncurrentCommand[0] = ref1.sensor.address;
-        sensor_block[0].conncurrentCommand[1] = 'C';
-        if ( ref1.sensor.crc ) sensor_block[0].conncurrentCommand[2] = 'C';
-        
-        sensor_block[1].conncurrentCommand[0] = ref2.sensor.address;
-        sensor_block[1].conncurrentCommand[1] = 'C';
-        if ( ref2.sensor.crc ) sensor_block[1].conncurrentCommand[2] = 'C';
-        
-        number_of_registered_sensors = 2;
-    }
-    
-    SDI12 & operator ( ) ( SDI12 &ref1, SDI12 &ref2, SDI12 &ref3 ) {
-        sensor_block[0].Class = &ref1;
-        sensor_block[1].Class = &ref2;
-        sensor_block[2].Class = &ref3;
-        sensor_block[3].Class = nullptr;
-        
-        sensor_block[0].conncurrentCommand[0] = ref1.sensor.address;
-        sensor_block[0].conncurrentCommand[1] = 'C';
-        if ( ref1.sensor.crc ) sensor_block[0].conncurrentCommand[2] = 'C';
-        
-        sensor_block[1].conncurrentCommand[0] = ref2.sensor.address;
-        sensor_block[1].conncurrentCommand[1] = 'C';
-        if ( ref2.sensor.crc ) sensor_block[1].conncurrentCommand[2] = 'C';
-        
-        sensor_block[2].conncurrentCommand[0] = ref3.sensor.address;
-        sensor_block[2].conncurrentCommand[1] = 'C';
-        if ( ref3.sensor.crc ) sensor_block[2].conncurrentCommand[2] = 'C';
-        
-        number_of_registered_sensors = 3;
-    }
-    
-    SDI12 & operator () ( SDI12 &ref1, SDI12 &ref2, SDI12 &ref3, SDI12 &ref4 ) {
-        sensor_block[0].Class = &ref1;
-        sensor_block[1].Class = &ref2;
-        sensor_block[2].Class = &ref3;
-        sensor_block[3].Class = &ref4;
-        
-        sensor_block[0].conncurrentCommand[0] = ref1.sensor.address;
-        sensor_block[0].conncurrentCommand[1] = 'C';
-        if ( ref1.sensor.crc ) sensor_block[0].conncurrentCommand[2] = 'C';
-        
-        sensor_block[1].conncurrentCommand[0] = ref2.sensor.address;
-        sensor_block[1].conncurrentCommand[1] = 'C';
-        if ( ref2.sensor.crc ) sensor_block[1].conncurrentCommand[2] = 'C';
-        
-        sensor_block[2].conncurrentCommand[0] = ref3.sensor.address;
-        sensor_block[2].conncurrentCommand[1] = 'C';
-        if ( ref3.sensor.crc ) sensor_block[2].conncurrentCommand[2] = 'C';
-        
-        sensor_block[3].conncurrentCommand[0] = ref4.sensor.address;
-        sensor_block[3].conncurrentCommand[1] = 'C';
-        if ( ref4.sensor.crc ) sensor_block[3].conncurrentCommand[2] = 'C';
-        
-        number_of_registered_sensors = 4;
-    }
-    
+    ~SDI12                 ( void ) { releaseVector( ); }
     void begin             ( uint32_t sample_rate, char command );
     void begin             ( void );
     int  isActive          ( int address = -1 );
     int  identification    ( const char *src ) { return identification( (const uint8_t *)src ); }
     int  identification    ( const uint8_t *src );
     int  queryAddress      ( void );
-    int  changeAddress     ( uint8_t new_address );
+    int  changeAddress     ( const uint8_t new_address );
     int  verification      ( const char *src ) { return verification( (const uint8_t *)src ); }
     int  verification      ( const uint8_t *src );
     int  measurement       ( int num = -1 ) { uint8_t s[75]; return measurement( s, num ); }
-    int  measurement       ( const char *src, int num = -1 ) { return measurement( (const uint8_t *)src, num ); }
+    int  measurement       ( const char *src, int num = -1 ) { return measurement( ( const uint8_t * )src, num ); }
     int  measurement       ( const uint8_t *src, int num = -1 );
-    int  continuous        ( const char *src, int num = -1 ) { return continuous( (const uint8_t *)src, num ); }
+    int  continuous        ( const char *src, int num = -1 ) { return continuous( ( const uint8_t * )src, num ); }
     int  continuous        ( const uint8_t *src, int num = -1 );
-    int  returnMeasurement ( const char *src, int num = -1 ) { return returnMeasurement( (const uint8_t *)src, num ); }
+    int  returnMeasurement ( const char *src, int num = -1 ) { return returnMeasurement( ( const uint8_t * )src, num ); }
     int  returnMeasurement ( const uint8_t *src, int num = -1 );
-    int  transparent       ( const char *command, const uint8_t *src ) { return transparent( (uint8_t*)command, src ); }
-    int  transparent       ( const uint8_t *command, const char *src ) { return transparent( command, (uint8_t*)src ); }
-    int  transparent       ( const char *command, const char *src ) { return transparent( (uint8_t*)command, (uint8_t*)src ); }
+    int  transparent       ( const char *command, const uint8_t *src ) { return transparent( ( uint8_t * )command, src ); }
+    int  transparent       ( const uint8_t *command, const char *src ) { return transparent( command, ( uint8_t * )src ); }
+    int  transparent       ( const char *command, const char *src ) { return transparent( ( uint8_t * )command, ( uint8_t * )src ); }
     int  transparent       ( const uint8_t *command, const uint8_t *src );
-    
-    static int concurrent ( int sen_arg1 = 0, int sen_arg2 = 0, int sen_arg3 = 0, int sen_arg4 = 0 );
+    int  concurrent        ( int num = -1 ) { uint8_t s[75]; return concurrent( s, num ); }
+    int  concurrent        ( const char *src, int num = -1 ) { return concurrent( (const uint8_t * )src, num ); }
+    int  concurrent        ( const uint8_t *src, int num = -1 ) ;
 private:
-    static SDI12 *CURRENT_CLASS;
-    static int number_of_registered_sensors;
-    static sensor_block_t sensor_block[4];
-    sensor_block_t sensor;
-    
     void init                    ( void );
     void allocateVector          ( void );
     void releaseVector           ( void );
+    void conncurrent_handler     ( void );
+    void wake_io                 ( void );
     int  send_command            ( const void *cmd, uint8_t count, uint8_t type );
-    void wake_io_blocking        ( void );
-    int  wake_io_non_blocking    ( void );
-    
-    static void io_break         ( void );
-    static void io_mark          ( void );
-    static void concurrentMeasure( void );
-    static void concurrentData   ( void );
+    sensor_block_t sensor;
+    volatile uint8_t retry;
 };
 //-----------------------------------------------------------------------------------------------
 #endif
