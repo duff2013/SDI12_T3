@@ -16,7 +16,7 @@ SDI-12
 1. Spacing (3.5V to 5V)<br>
 2. Marking (-0.5V to 1V)<br>
 
->For proper level shifting I found that you can use the Adafruit's Bi-directional Logic Level Converter [TXB0104]. I2C level shifters do not work because of their 'open-drain the' [TXB0104] uses 'push-pull'.
+>For proper level shifting I found that you can use the Adafruit's Bi-directional Logic Level Converter [TXB0104]. I2C level shifters do not work because of their 'open-drain' architecture the [TXB0104] uses 'push-pull'.
 <br>
 
 
