@@ -52,17 +52,9 @@ class CRC {
 public:
     CRC( void );
     ~CRC( void );
-    uint8_t asciiCRC[4];
-    unsigned short sdi12_crc;
-    // This is a 16 bit unsigned integer. Depending on
-    // your compiler the type for an unsigned 16 bit integer
-    // may be different. For example, on some compilers a
-    // 16 bit unsigned integer is "unsigned int"
-    // This variable, and other other instances of
-    // "unsigned short" in this class, must be 16 bit
-    // unsigned integers.
     void append ( uint8_t *s );
-    int  check  ( uint8_t *s );
+    int  check  ( volatile void  *s );
+    uint8_t asciiCRC[4];
 private:
     // The maximum characters allowed in a response to D command is:
     // 75 chars in the <values> part of the the command + addr + crc1 + crc2 + crc3 +
@@ -77,6 +69,14 @@ private:
     int  hasCRLF        ( uint8_t *s );
     void removeAscii    ( uint8_t *s );
     void removeCRLF     ( uint8_t *s );
+    // This is a 16 bit unsigned integer. Depending on
+    // your compiler the type for an unsigned 16 bit integer
+    // may be different. For example, on some compilers a
+    // 16 bit unsigned integer is "unsigned int"
+    // This variable, and other other instances of
+    // "unsigned short" in this class, must be 16 bit
+    // unsigned integers.
+    unsigned short sdi12_crc;
 };
 
 #endif

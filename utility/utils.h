@@ -69,6 +69,8 @@ static run_once __o;
 
 #define BLOCKING            1
 #define NON_BLOCKING        2
+
+void detachInterruptVector( enum IRQ_NUMBER_t irq );
 // --------------------------------------------------------------------------------------------
 #if defined(KINETISK)
     #define ENABLE_UART0 ({                                                             \
@@ -91,7 +93,7 @@ static run_once __o;
         BITBAND_U32(SIM_SCGC4, SCGC4_UART1_BIT) = 0x01;                                 \
         CORE_PIN9_CONFIG = PORT_PCR_PE | PORT_PCR_PS | PORT_PCR_PFE | PORT_PCR_MUX(3);  \
         CORE_PIN10_CONFIG = PORT_PCR_DSE | PORT_PCR_SRE | PORT_PCR_MUX(3);              \
-        int divisor = BAUD2DIV(1200);                                                   \
+        int divisor = BAUD2DIV2(1200);                                                   \
         UART1_BDH = (divisor >> 13) & 0x1F;                                             \
         UART1_BDL = (divisor >> 5) & 0xFF;                                              \
         UART1_C4 = divisor & 0x1F;                                                      \
@@ -139,9 +141,9 @@ static run_once __o;
         SIM_SCGC4 |= SIM_SCGC4_UART1;                                                   \
         CORE_PIN9_CONFIG = PORT_PCR_PE | PORT_PCR_PS | PORT_PCR_PFE | PORT_PCR_MUX(3);  \
         CORE_PIN10_CONFIG = PORT_PCR_DSE | PORT_PCR_SRE | PORT_PCR_MUX(3);              \
-        int divisor = BAUD2DIV(1200);                                                   \
-        UART1_BDH = (divisor >> 13) & 0x1F;                                             \
-        UART1_BDL = (divisor >> 5) & 0xFF;                                              \
+        int divisor = BAUD2DIV2(1200);                                                  \
+        UART1_BDH = (divisor >> 8) & 0x1F;                                              \
+        UART1_BDL = divisor & 0xFF;                                                     \
         UART1_C1 = SDI12_ENABLE;                                                        \
         UART1_PFIFO = 0;                                                                \
         UART1_C2 = UART_C2_TE | UART_C2_RE | UART_C2_RIE;                               \
@@ -165,5 +167,6 @@ static run_once __o;
     })
 #endif
 #endif
+
 
 

@@ -48,7 +48,7 @@ CRC::~CRC( void ) {
     
 }
 
-void CRC::append( uint8_t *s ) {
+void CRC::append( uint8_t * s ) {
     // This public function computes and appends a CRC to the end of a response to
     // an SDI-12 D Command.
     removeCRLF ( s );
@@ -61,22 +61,24 @@ void CRC::append( uint8_t *s ) {
 
 //----------------------------------------------public------------------------------------------------
 
-int CRC::check( uint8_t *s ) {
+int CRC::check( volatile void * s ) {
+    
+    uint8_t * src = ( uint8_t * )s;
     // This public function checks the CRC found at the end of the response to an
     // SDI-12 D command.
     unsigned short receivedCRC;
     unsigned short expectedCRC;
     
     // get the CRC that was received
-    removeCRLF  ( s );
-    extractAscii( s );
+    removeCRLF  ( src );
+    extractAscii( src );
     asciiToShort(   );
     
     receivedCRC = sdi12_crc;
     // compute the expected CRC
     
-    removeAscii( s );
-    compute    ( s );
+    removeAscii( src );
+    compute    ( src );
     
     expectedCRC = sdi12_crc;
     if ( receivedCRC == expectedCRC ) return( 0 );
@@ -89,7 +91,7 @@ void CRC::appendAscii( uint8_t *s ) {
     strcat( ( char * )s , ( char * )asciiCRC );
 }
 
-void CRC::appendCRLF( uint8_t *s ) {
+void CRC::appendCRLF( uint8_t * s ) {
     int i  = strlen( ( char * )s );
     s[i++] = CARRIAGE_RETURN;
     s[i++] = LINE_FEED;
@@ -109,7 +111,7 @@ void CRC::asciiToShort( ) {
     else sdi12_crc = 0;
 }
 
-void CRC::compute( uint8_t *s ) {
+void CRC::compute( uint8_t * s ) {
     // This function computes the CRC using the algorithm found in paragraph
     // 4.4.12.1 of the SDI-12 specification.
     int i;
@@ -142,7 +144,7 @@ void CRC::toAscii( ) {
     asciiCRC[3] = END_STRING;
 }
 
-void CRC::extractAscii( uint8_t *s ) {
+void CRC::extractAscii( uint8_t * s ) {
     int i;
     i = strlen( ( char * )s );
     if (i >= 3) {
@@ -154,7 +156,7 @@ void CRC::extractAscii( uint8_t *s ) {
     else strcpy( ( char * )asciiCRC, "" );
 }
 
-int  CRC::hasCRLF( uint8_t *s ) {
+int  CRC::hasCRLF( uint8_t * s ) {
     int count;
     count = strlen( ( char * )s );
     if (count >= 2) {
@@ -170,7 +172,7 @@ void CRC::removeAscii( uint8_t * s ) {
     if ( count >= 3 ) s[count-3] = END_STRING;
 }
 
-void CRC::removeCRLF( uint8_t *s ) {
+void CRC::removeCRLF( uint8_t * s ) {
     int count;
     if ( hasCRLF( s ) ) {
         count = strlen( ( char * )s );

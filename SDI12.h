@@ -1,7 +1,7 @@
 /*
  ||
  || @file 	SDI12.h
- || @version 	2
+ || @version 	3
  || @author 	Colin Duffy
  || @contact 	cmduffy@engr.psu.edu
  ||
@@ -34,8 +34,6 @@
 #ifdef __cplusplus
 
 #include "Arduino.h"
-#include "utility/utils.h"
-#include "utility/CRC.h"
 
 class SDI12;
 
@@ -88,40 +86,44 @@ public:
         init( );
         allocateVector( );
     }
+    
+    SDI12( Stream *port ) {
+        sensor.uart = port;
+        init( );
+        allocateVector( );
+    }
+    
+    SDI12 & operator = ( const SDI12 &rhs ) {
+        if ( this != &rhs ) {
+            sensor.uart = rhs.sensor.uart;
+            sensor.address = rhs.sensor.address;
+            sensor.crc = rhs.sensor.crc;
+        }
+        return *this;
+    };
+    
     ~SDI12                 ( void ) { releaseVector( ); }
-    void begin             ( uint32_t sample_rate, char command );
-    void begin             ( void );
     int  isActive          ( int address = -1 );
-    int  identification    ( const char *src ) { return identification( (const uint8_t *)src ); }
-    int  identification    ( const uint8_t *src );
+    int  identification    ( volatile void *src );
     int  queryAddress      ( void );
     int  changeAddress     ( const uint8_t new_address );
-    int  verification      ( const char *src ) { return verification( (const uint8_t *)src ); }
-    int  verification      ( const uint8_t *src );
-    int  measurement       ( int num = -1 ) { uint8_t s[75]; return measurement( s, num ); }
-    int  measurement       ( const char *src, int num = -1 ) { return measurement( ( const uint8_t * )src, num ); }
-    int  measurement       ( const uint8_t *src, int num = -1 );
-    int  continuous        ( const char *src, int num = -1 ) { return continuous( ( const uint8_t * )src, num ); }
-    int  continuous        ( const uint8_t *src, int num = -1 );
-    int  returnMeasurement ( const char *src, int num = -1 ) { return returnMeasurement( ( const uint8_t * )src, num ); }
-    int  returnMeasurement ( const uint8_t *src, int num = -1 );
-    int  transparent       ( const char *command, const uint8_t *src ) { return transparent( ( uint8_t * )command, src ); }
-    int  transparent       ( const uint8_t *command, const char *src ) { return transparent( command, ( uint8_t * )src ); }
-    int  transparent       ( const char *command, const char *src ) { return transparent( ( uint8_t * )command, ( uint8_t * )src ); }
-    int  transparent       ( const uint8_t *command, const uint8_t *src );
-    int  concurrent        ( int num = -1 ) { uint8_t s[75]; return concurrent( s, num ); }
-    int  concurrent        ( const char *src, int num = -1 ) { return concurrent( (const uint8_t * )src, num ); }
-    int  concurrent        ( const uint8_t *src, int num = -1 ) ;
+    int  verification      ( volatile void *src );
+    int  measurement       ( int num = -1 ) { uint8_t src[10]; return measurement( src, num ); }
+    int  measurement       ( volatile void *src, int num = -1 );
+    int  continuous        ( volatile void *src, int num = -1 );
+    int  returnMeasurement ( volatile void *src, int num = -1 );
+    int  concurrent        ( volatile void *src, int num = -1 );
+    int  transparent       ( const void *command, volatile void *src );
 private:
-    void init                    ( void );
-    void allocateVector          ( void );
-    void releaseVector           ( void );
-    void conncurrent_handler     ( void );
-    void wake_io                 ( void );
-    int  send_command            ( const void *cmd, uint8_t count, uint8_t type );
-    sensor_block_t sensor;
+    void init               ( void );
+    void allocateVector     ( void );
+    void releaseVector      ( void );
+    void conncurrent_handler( void );
+    void wake_io            ( void );
+    int  send_command       ( const void *cmd, uint8_t count, uint8_t type );
+    sensor_block_t   sensor;
     volatile uint8_t retry;
 };
 //-----------------------------------------------------------------------------------------------
-#endif
+#endif// end __cplusplus
 #endif
