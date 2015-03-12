@@ -1,7 +1,9 @@
 SDI-12
 =========
 
-<h3>Teensy 3.x SDI-12 Library V2</h3>
+<h3>Teensy 3.x/LC SDI-12 Library V3</h3>
+
+<h4>Update!!! 03/12/15 - Even more stable and more TeensyLC compatible also Concurrent Command is now available. Next update will be for a total non-blocking Concurrent Command.</h4>
 
 <h4>Update!!! 02/26/15 - Now much more stable and TeensyLC compatible. </h4>
 
@@ -12,7 +14,7 @@ SDI-12
 
 
 <b>Level Shifting:</b>
->Since Teensy are 3.3V micrcontrollers it is actually out of SDI12 specification:<br>
+>Since Teensy (3.x/LC) are 3.3V micrcontrollers it is actually out of SDI12 specification:<br>
 1. Spacing (3.5V to 5V)<br>
 2. Marking (-0.5V to 1V)<br>
 
@@ -33,7 +35,7 @@ SDI-12
 
 Connect the sensor to Teensy using Teensy's Vin (5V) for sensor power.<br>
 ```
-  Teensy 3.0                                                   Sensor
+  Teensy 3.0/LC                                                Sensor
  ----------------                                           -------------  
 | Serial Port TX |<------------[10K Resistor]------------->|    Data     |
 |       GND      |<----------------------------------------|    GND      |
@@ -49,7 +51,7 @@ Connect the sensor to Teensy using Teensy's Vin (5V) for sensor power.<br>
 ```
 Connect the sensor to Teensy using external Vin for sensor power.<br>
 ```
-  Teensy 3.0                                                   Sensor
+  Teensy 3.0/LC                                                Sensor
  ----------------                                           -------------  
 | Serial Port TX |<------------[10K Resistor]------------->|    Data     |
 |       GND      |--------|                    |-----------|    GND      |
@@ -79,7 +81,7 @@ Connect a sensor using level shifter and Teensy's Vin for sensor power.<br>
                     | | |----->|3.3V    5V|<-| | |
                     | | | |--->|OE        |X | | |
                     | | | |     ----------   | | |
-    Teensy 3.x      | | | |                  | | |               Sensor
+    Teensy 3.x/LC   | | | |                  | | |               Sensor
  ----------------   | | | |                  | | |           -------------
 | Serial Port TX |<-| | | |                  | | |--------->|    Data     |
 |       GND      |<---| | |                  | |------------|    GND      |
@@ -96,7 +98,7 @@ Connect a sensor using level shifter using Ext Vin for sensor power.<br>
                     | | |----->|3.3V    5V|<-| |
                     | | | |--->|OE        |X | |
                     | | | |     ----------   | |
-    Teensy 3.x      | | | |                  | |               Sensor
+    Teensy 3.x/LC   | | | |                  | |               Sensor
  ----------------   | | | |                  | |           -------------
 | Serial Port TX |<-| | | |                  | |--------->|    Data     |
 |       GND      |<---| | |                  |       |----|    GND      |
@@ -174,10 +176,9 @@ if( error ) Serial.println( "Sensor at address 5 Not Active" );
 ---
 ```c
 // SDI12 (Send Identification) "aI!" command.
-int identification( const char *src ) { identification( (const uint8_t *)src ); }
-int identification( const uint8_t *src );
+int identification( volatile void *src );
 ```
->1. ```const (char or uint8_t) *src``` = buffer array you supply to hold returned string.
+>1. ```(char or uint8_t) *src``` = buffer array you supply to hold returned string.
 
 Example:
 ```c
@@ -249,10 +250,9 @@ if( address != -1 ) {
 ---
 ```c
 // SDI12 (Start Verification) "aV!" command.
-int verification( const char *src ) { verification( (const uint8_t *)src ); }
-int verification( const uint8_t *src );
+int verification( volatile void *src );
 ```
->1. ```const (char or uint8_t) *src``` = buffer array you supply to hold returned string.
+>1. ```(char or uint8_t) *src``` = buffer array you supply to hold returned string.
 
 Example:
 ```c
@@ -277,10 +277,9 @@ if ( !error ) Serial.print( buf );
 // SDI12 (Start Measurement) command.
 // "aM!", "aMC!" or "aM0...aM9" or "aMC0...aMC9"
 int measurement( int num = -1 ) { uint8_t s[75]; measurement( s, num ); }
-int measurement( const char *src, int num = -1 ) { measurement( (const uint8_t *)src, num ); }
-int measurement( const uint8_t *src, int num = -1 );
+int measurement( volatile void *src, int num = -1 );
 ```
->1. ```const (char or uint8_t) *src``` = buffer array you supply to hold acknowledgement string.
+>1. ```(char or uint8_t) *src``` = buffer array you supply to hold acknowledgement string.
 >2. ```int num = -1```(optional) = Additional measurements.
 
 Example:
@@ -339,11 +338,9 @@ if ( !error ) Serial.print( data );
 ```c
 // SDI12 (Start Concurrent Measurement) command.
 // "aC!","aCC!" or "aC0...aC9" or "aCC0...aCC9"
-int  concurrent( int num = -1 ) { uint8_t s[75]; return concurrent( s, num ); }
-int  concurrent( const char *src, int num = -1 ) { return concurrent( (const uint8_t * )src, num ); }
-int  concurrent( const uint8_t *src, int num = -1 ) ;
+int  concurrent( volatile void *src, int num = -1 );
 ```
->1. ```const (char or uint8_t) *src``` = buffer array you supply to hold acknowledgement string.
+>1. ```(char or uint8_t) *src``` = buffer array you supply to hold acknowledgement string.
 >2. ```int num = -1```(optional) = Additional measurements.
 
 Example:
@@ -364,10 +361,9 @@ if ( !error ) Serial.print( data );
 ```c
 // SDI12 (Start Continuous Measurement) command.
 // "aR0!...aR9!" or "aRC0!...aRC9!"
-int continuous( const char *src, int num = -1 ) { continuous( (const uint8_t *)src, num ); }
-int continuous( const uint8_t *src, int num = -1 );
+int continuous( volatile void *src, int num = -1 );
 ```
->1. ```const (char or uint8_t) *src``` = buffer array you supply to hold returned string.
+>1. ```(char or uint8_t) *src``` = buffer array you supply to hold returned string.
 >2. ```int num = -1```(optional) = Additional measurements.
 
 Example:
@@ -392,10 +388,9 @@ if ( !error ) Serial.print( data );
 ```c
 // SDI12 (Return Measurement) command.
 // "aD!" or "aD0!...aD9!"
-int returnMeasurement( const char *src, int num = -1 ) { returnMeasurement( (const uint8_t *)src, num ); }
-int returnMeasurement( const uint8_t *src, int num = -1 );
+int returnMeasurement( volatile void *src, int num = -1 );
 ```
->1. ```const (char or uint8_t) *src``` = buffer array you supply to hold returned string.
+>1. ```(char or uint8_t) *src``` = buffer array you supply to hold returned string.
 >2. ```int num = -1```(optional) = Additional measurements.
 
 Example:
@@ -408,13 +403,10 @@ Example:
 ---
 ```c
 // SDI12 (Transparent) command. Allows extended SDI12 commands.
-int transparent( const char *command, const uint8_t *src ) { transparent( (uint8_t*)command, src ); }
-int transparent( const uint8_t *command, const char *src ) { transparent( command, (uint8_t*)src ); }
-int transparent( const char *command, const char *src ) { transparent( (uint8_t*)command, (uint8_t*)src ); }
-int transparent( const uint8_t *command, const uint8_t *src );
+int transparent( const void *command, volatile void *src );
 ```
 >1. ```const (char or uint8_t) *command``` = SDI12 command to send.
->2. ```const (char or uint8_t) *src``` = buffer array you supply to hold returned string.
+>2. ```(char or uint8_t) *src``` = buffer array you supply to hold returned string.
 
 Example:
 ```c
