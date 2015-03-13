@@ -290,8 +290,6 @@ char debug[10];
 // Max return sensor string size is 81 characters.
 char data[81];
 
-memset( data, 0, 81 );
-memset( debug, 0, 10 );
 // Function to tell sensor to make a measurement.
 // optional additional measurements command.
 /***error = DECAGON_5TE_10CM.measurement( debug, 0 );***/
@@ -302,8 +300,6 @@ if ( !error ) Serial.print( debug );
 error = DECAGON_5TE_10CM.returnMeasurement( data, 0 );
 if ( !error ) Serial.print( data );
 
- memset( data, 0, 81 );
- memset( debug, 0, 10 );
 // Function to tell sensor to make a measurement.
 // optional additional measurements command.
 /***error = DECAGON_5TE_20CM.measurement( debug, 0 );***/
@@ -312,8 +308,6 @@ if ( !error ) Serial.print( data );
  error = DECAGON_5TE_20CM.returnMeasurement( data, 0 );
  if (!error) Serial.print( data );
    
-memset( data, 0, 81 );
-memset( debug, 0, 10 );
 // Function to tell sensor to make a measurement.
 // optional additional measurements command.
 /***error = DECAGON_5TE_30CM.measurement( debug, 0 );***/
@@ -322,8 +316,6 @@ if ( !error ) Serial.print( debug );
 error = DECAGON_5TE_30CM.returnMeasurement( data, 0 );
 if ( !error ) Serial.print( data );
    
-memset( data, 0, 81 );
-memset( debug, 0, 10 );
 // Function to tell sensor to make a measurement.
 // optional additional measurements command.
 /***error = DECAGON_5TE_40CM.measurement( debug, 0 );***/
@@ -345,8 +337,6 @@ int  concurrent( volatile void *src, int num = -1 );
 
 Example:
 ```c
-memset( data, 0, 81 );
-memset( debug, 0, 10 );
 // Function to tell sensor to make a measurement.
 // optional additional measurements command.
 /***error = DECAGON_5TE_40CM.concurrent( debug, 0 );***/
@@ -373,7 +363,6 @@ int error;
 // Max return sensor string size is 81 characters.
 char data[81];
 
-memset( data, 0, 81 );
 // Function to tell sensor to get a continuous measurement 
 // if the sensor supports it.
 // optional additional measurements command.
