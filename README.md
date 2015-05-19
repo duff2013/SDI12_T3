@@ -1,7 +1,7 @@
 SDI-12
 =========
 
-<h3>Teensy 3.x/LC SDI-12 Library V3</h3>
+<h3>Teensy 3.x/LC SDI-12 Library v3</h3>
 
 <h4>Update!!! 03/12/15 - Even more stable and more TeensyLC compatible also Concurrent Command is now available. Next update will be for a total non-blocking Concurrent Command.</h4>
 
