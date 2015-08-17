@@ -80,7 +80,7 @@ Connect the sensor to Teensy using Teensy's Vin (5V) for sensor power.<br>
 
 Connect the sensor to Teensy using external Vin for sensor power.<br>
 ```
-External Power                                             
+                External Power                                             
                  ----------                                                
    *---12-7V---<|VOUT      |                                               
    | *---GND--->|GND    GND|<--*       TEENSY 3.0/LC                       
@@ -106,7 +106,7 @@ External Power
   \/ \/ \/                                                                 
 
 
-External Power                                             
+                External Power                                             
                  ----------                                                
    *---12-7V---<|VOUT      |                                               
    | *---GND--->|GND    GND|<--*         TEENSY 3.1                        
@@ -167,7 +167,7 @@ Connect a sensor using level shifter and Teensy's Vin for sensor power.<br>
 
 Connect a sensor using level shifter using Ext Vin for sensor power.<br>
 ```
-External Power                               
+                             External Power                               
                               ----------                                     
                              |      VOUT|>-------7-12V--------------*     
 *-------------GND----------->|GND    GND|<--------GND-------------* |     
