@@ -134,8 +134,8 @@ External Power
 
 Connect a sensor using level shifter and Teensy's Vin for sensor power.<br>
 ```
-*-----5V-------*     
-|              |     
+                                                     *-----5V-------*     
+                                                     |              |     
 *----------------------GND---------------------------^-----GND----* |     
 |                                                    |            | |     
 |                                                    | *-SIGNAL-* | |     
