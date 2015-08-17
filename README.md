@@ -1,13 +1,6 @@
-SDI-12
-=========
+<h1 align="center">SDI-12</h1>
 
-<h3>Teensy 3.x/LC SDI-12 Library v3</h3>
-
-<h4>Update!!! 03/12/15 - Even more stable and more TeensyLC compatible also Concurrent Command is now available. Next update will be for a total non-blocking Concurrent Command.</h4>
-
-<h4>Update!!! 02/26/15 - Now much more stable and TeensyLC compatible. </h4>
-
-<h4>This library implements the SDI-12 v1.3 protocol, natively using Teensy's hardware serial one-wire protocol.</h4>
+<h3 align="center">Teensy 3.x/LC SDI-12 Library v3</h3>
 
 <b>[SDI12 Specification]</b>
 > SDI12 is a single wire serial protocol that uses inverted 5V logic levels, specifically (1200 baud, 7E1) for bi-directional data flow with one Master and many Slaves. This library sets up the Freescale Cortex one-wire protocol for each of its 3 Hardware Serial ports TX pin along with critical timing - Break and Mark signals to wake the sensor bus. This makes effectively 3 separate SDI12 buses that can be used or not. Since SDI12 is Master-Slave, many different types of sensor can share the same bus through the use of unique address for each sensor.<br>
@@ -35,196 +28,181 @@ SDI-12
 
    Connect the sensor to Teensy using Teensy's Vin (5V) for sensor power.<br>
 ```
-:---------------------------------------------------------------------------:
-:                                                                           :          
-:                                                                           :
-:   *-----------------5V DC---------------------------------*               :
-:   |                                                       |               :
-:   |                                   TEENSY 3.0/LC       |               :
-:   |                                  _______________      |               :
-:   | *----------------GND----------->|GND |_____| Vin|>----*               :
-:   | |                               |0  -----   AGND|                     :
-:   | | *--Signal---/\/\/\/\--------<>|1/TX1   |  3.3V|                     :
-:  _|_|_|__            10K            |2 |,,,,,|    23|                     :
-: /        \                          |3  -----     22|                     :
-:| DECAGON  |                         |4 |'|        21|                     :
-:|   5TE    |                         |5   ------   20|                     :
-:|          |                         |6 |::::::::| 19|                     :
-:|          |                         |7 |::::::::| 18|                     :
-:|          |                         |8 |::::::::| 17|                     :
-:|          |                         |9   ------   16|                     :
-: \________/                          |10    ---    15|                     :
-:  || || ||                           |11   |(`)|   14|                     :
-:  || || ||                           |12    ---    13|                     :
-:  || || ||                            ---------------                      : 
-:  || || ||                                                                 :
-:  || || ||                                                                 :     
-:  || || ||                                                                 :
-:  \/ \/ \/                                                                 :
-:                                                                           :
-:                                                                           :
-:   *-----------------5V DC---------------------------------*               :
-:   |                                                       |               : 
-:   |                                    TEENSY 3.1         |               :
-:   |                                  _______________      |               :
-:   | *----------------GND----------->|GND |_____| Vin|>----*               :
-:   | |                               |0  -----   AGND|                     :
-:   | | *-------------Signal--------<>|1/TX1   |  3.3V|                     :
-:  _|_|_|__                           |2 |,,,,,|    23|                     :
-: /        \                          |3  -----     22|                     :
-:| DECAGON  |                         |4 |'|        21|                     :
-:|   5TE    |                         |5   ------   20|                     :
-:|          |                         |6 |::::::::| 19|                     :
-:|          |                         |7 |::::::::| 18|                     :
-:|          |                         |8 |::::::::| 17|                     :
-:|          |                         |9   ------   16|                     :
-: \________/                          |10    ---    15|                     :
-:  || || ||                           |11   |(`)|   14|                     :
-:  || || ||                           |12    ---    13|                     :
-:  || || ||                            ---------------                      :
-:  || || ||                                                                 :
-:  || || ||                                                                 :
-:  || || ||                                                                 :
-:  \/ \/ \/                                                                 :
-:---------------------------------------------------------------------------:
+    *-----------------5V DC---------------------------------*               
+    |                                                       |               
+    |                                   TEENSY 3.0/LC       |               
+    |                                  _______________      |               
+    | *----------------GND----------->|GND |_____| Vin|>----*               
+    | |                               |0  -----   AGND|                     
+    | | *--Signal---/\/\/\/\--------<>|1/TX1   |  3.3V|                     
+   _|_|_|__            10K            |2 |,,,,,|    23|                     
+  /        \                          |3  -----     22|                     
+ | DECAGON  |                         |4 |'|        21|                     
+ |   5TE    |                         |5   ------   20|                     
+ |          |                         |6 |::::::::| 19|                     
+ |          |                         |7 |::::::::| 18|                     
+ |          |                         |8 |::::::::| 17|                     
+ |          |                         |9   ------   16|                     
+  \________/                          |10    ---    15|                     
+   || || ||                           |11   |(`)|   14|                     
+   || || ||                           |12    ---    13|                     
+   || || ||                            ---------------                       
+   || || ||                                                                 
+   || || ||                                                                      
+   || || ||                                                                 
+   \/ \/ \/                                                                 
+                                                                           
+                                                                            
+    *-----------------5V DC---------------------------------*               
+    |                                                       |                
+    |                                    TEENSY 3.1         |               
+    |                                  _______________      |               
+    | *----------------GND----------->|GND |_____| Vin|>----*               
+    | |                               |0  -----   AGND|                     
+    | | *-------------Signal--------<>|1/TX1   |  3.3V|                     
+   _|_|_|__                           |2 |,,,,,|    23|                     
+  /        \                          |3  -----     22|                     
+ | DECAGON  |                         |4 |'|        21|                     
+ |   5TE    |                         |5   ------   20|                     
+ |          |                         |6 |::::::::| 19|                     
+ |          |                         |7 |::::::::| 18|                     
+ |          |                         |8 |::::::::| 17|                     
+ |          |                         |9   ------   16|                     
+  \________/                          |10    ---    15|                     
+   || || ||                           |11   |(`)|   14|                     
+   || || ||                           |12    ---    13|                     
+   || || ||                            ---------------                      
+   || || ||                                                                 
+   || || ||                                                                 
+   || || ||                                                                 
+   \/ \/ \/                                                                 
 ```
 
    Connect the sensor to Teensy using external Vin for sensor power.<br>
 ```
-:---------------------------------------------------------------------------:
-:                                                                           :          
-:                                                                           :
-:                External Power                                             :
-:                 ----------                                                :
-:   *---12-7V---<|VOUT      |                                               :
-:   | *---GND--->|GND    GND|<--*       TEENSY 3.0/LC                       :
-:   | |           ----------    |      _______________                      :
-:   | |                         *---->|GND |_____| Vin|                     :
-:   | |                               |0  -----   AGND|                     :
-:   | | *--Signal---/\/\/\/\--------<>|1/TX1   |  3.3V|                     :
-:  _|_|_|__            10K            |2 |,,,,,|    23|                     :
-: /        \                          |3  -----     22|                     :
-:| DECAGON  |                         |4 |'|        21|                     :
-:|   5TE    |                         |5   ------   20|                     :
-:|          |                         |6 |::::::::| 19|                     :
-:|          |                         |7 |::::::::| 18|                     :
-:|          |                         |8 |::::::::| 17|                     :
-:|          |                         |9   ------   16|                     :
-: \________/                          |10    ---    15|                     :
-:  || || ||                           |11   |(`)|   14|                     :
-:  || || ||                           |12    ---    13|                     :
-:  || || ||                            ---------------                      : 
-:  || || ||                                                                 :
-:  || || ||                                                                 :     
-:  || || ||                                                                 :
-:  \/ \/ \/                                                                 :
-:                                                                           :
-:                                                                           :
-:                External Power                                             :
-:                 ----------                                                :
-:   *---12-7V---<|VOUT      |                                               :
-:   | *---GND--->|GND    GND|<--*         TEENSY 3.1                        :
-:   | |           ----------    |      _______________                      :
-:   | |                         *---->|GND |_____| Vin|                     :
-:   | |                               |0  -----   AGND|                     :
-:   | | *------------Signal---------<>|1/TX1   |  3.3V|                     :
-:  _|_|_|__                           |2 |,,,,,|    23|                     :
-: /        \                          |3  -----     22|                     :
-:| DECAGON  |                         |4 |'|        21|                     :
-:|   5TE    |                         |5   ------   20|                     :
-:|          |                         |6 |::::::::| 19|                     :
-:|          |                         |7 |::::::::| 18|                     :
-:|          |                         |8 |::::::::| 17|                     :
-:|          |                         |9   ------   16|                     :
-: \________/                          |10    ---    15|                     :
-:  || || ||                           |11   |(`)|   14|                     :
-:  || || ||                           |12    ---    13|                     :
-:  || || ||                            ---------------                      : 
-:  || || ||                                                                 :
-:  || || ||                                                                 :     
-:  || || ||                                                                 :
-:  \/ \/ \/                                                                 :
-:---------------------------------------------------------------------------:
+                 External Power                                             
+                  ----------                                                
+    *---12-7V---<|VOUT      |                                               
+    | *---GND--->|GND    GND|<--*       TEENSY 3.0/LC                       
+    | |           ----------    |      _______________                      
+    | |                         *---->|GND |_____| Vin|                     
+    | |                               |0  -----   AGND|                     
+    | | *--Signal---/\/\/\/\--------<>|1/TX1   |  3.3V|                     
+   _|_|_|__            10K            |2 |,,,,,|    23|                     
+  /        \                          |3  -----     22|                     
+ | DECAGON  |                         |4 |'|        21|                     
+ |   5TE    |                         |5   ------   20|                     
+ |          |                         |6 |::::::::| 19|                     
+ |          |                         |7 |::::::::| 18|                     
+ |          |                         |8 |::::::::| 17|                     
+ |          |                         |9   ------   16|                     
+  \________/                          |10    ---    15|                     
+   || || ||                           |11   |(`)|   14|                     
+   || || ||                           |12    ---    13|                     
+   || || ||                            ---------------                       
+   || || ||                                                                 
+   || || ||                                                                      
+   || || ||                                                                 
+   \/ \/ \/                                                                 
+                                                                            
+                                                                            
+                 External Power                                             
+                  ----------                                                
+    *---12-7V---<|VOUT      |                                               
+    | *---GND--->|GND    GND|<--*         TEENSY 3.1                        
+    | |           ----------    |      _______________                      
+    | |                         *---->|GND |_____| Vin|                     
+    | |                               |0  -----   AGND|                     
+    | | *------------Signal---------<>|1/TX1   |  3.3V|                     
+   _|_|_|__                           |2 |,,,,,|    23|                     
+  /        \                          |3  -----     22|                     
+ | DECAGON  |                         |4 |'|        21|                     
+ |   5TE    |                         |5   ------   20|                     
+ |          |                         |6 |::::::::| 19|                     
+ |          |                         |7 |::::::::| 18|                     
+ |          |                         |8 |::::::::| 17|                     
+ |          |                         |9   ------   16|                     
+  \________/                          |10    ---    15|                     
+   || || ||                           |11   |(`)|   14|                     
+   || || ||                           |12    ---    13|                     
+   || || ||                            ---------------                       
+   || || ||                                                                 
+   || || ||                                                                      
+   || || ||                                                                 
+   \/ \/ \/                                                                 
 ```
 
    Connect a sensor using level shifter and Teensy's Vin for sensor power.<br>
 ```
-:---------------------------------------------------------------------------:
-:                                                      *-----5V-------*     :
-:                                                      |              |     :
-: *----------------------GND---------------------------^-----GND----* |     :
-: |                                                    |            | |     :
-: |                                                    | *-SIGNAL-* | |     :
-: |                                                    | |        | | |     :
-: |                                                    | |       _*_*_*__   :
-: |           TEENSY 3.x/LC                            | |      /        \  :
-: |          _______________                           | |     | DECAGON  | :
-: *-------->|GND |_____| Vin|>------5V-----------------* |     |   5TE    | :
-: |  *-----<|0  -----   AGND|             ----------   | |     |          | :
-: |  |  *-<>|1/TX1   |  3.3V|>---------->|3.3V    5V|<-* |     |          | :
-: |  |  |   |2 |,,,,,|    23|      *---<>|A1      B1|<>--*     |          | :
-: |  |  |   |3  -----     22|      |     |A2      B2|          |          | :
-: |  |  |   |4 |'|        21|      |     |A4      B4|          |          | :
-: |  |  |   |5   ------   20|      |     |A3      B3|           \________/  :
-: |  |  |   |6 |::::::::| 19|      |  *->|OE     GND|<-----*     || || ||   :
-: |  |  |   |7 |::::::::| 18|      |  |   ----------       |     || || ||   :
-: |  |  |   |8 |::::::::| 17|      |  |     TXB0104        |     || || ||   :
-: |  |  |   |9   ------   16|      |  |  bi-directional    |     || || ||   :
-: |  |  |   |10    ---    15|      |  |  level converter   |     || || ||   :
-: |  |  |   |11   |(`)|   14|      |  |                    |     || || ||   :
-: |  |  |   |12    ---    13|      |  |                    |     || || ||   :
-: |  |  |    ---------------       |  |                    |     \/ \/ \/   :         
-: |  |  *--------TEENSY-SIGNAL-----*  |                    |                :
-: |  |                                |                    |                :
-: |  *-----------OE CONTROL-----------*                    |                :
-: |                                                        |                :
-: *-----------------GND------------------------------------*                :
-:                                                                           :
-:---------------------------------------------------------------------------:
+                                                      *-----5V-------*     
+                                                      |              |     
+ *----------------------GND---------------------------^-----GND----* |     
+ |                                                    |            | |     
+ |                                                    | *-SIGNAL-* | |     
+ |                                                    | |        | | |     
+ |                                                    | |       _*_*_*__   
+ |           TEENSY 3.x/LC                            | |      /        \  
+ |          _______________                           | |     | DECAGON  | 
+ *-------->|GND |_____| Vin|>------5V-----------------* |     |   5TE    | 
+ |  *-----<|0  -----   AGND|             ----------   | |     |          | 
+ |  |  *-<>|1/TX1   |  3.3V|>---------->|3.3V    5V|<-* |     |          | 
+ |  |  |   |2 |,,,,,|    23|      *---<>|A1      B1|<>--*     |          | 
+ |  |  |   |3  -----     22|      |     |A2      B2|          |          | 
+ |  |  |   |4 |'|        21|      |     |A4      B4|          |          | 
+ |  |  |   |5   ------   20|      |     |A3      B3|           \________/  
+ |  |  |   |6 |::::::::| 19|      |  *->|OE     GND|<-----*     || || ||   
+ |  |  |   |7 |::::::::| 18|      |  |   ----------       |     || || ||   
+ |  |  |   |8 |::::::::| 17|      |  |     TXB0104        |     || || ||   
+ |  |  |   |9   ------   16|      |  |  bi-directional    |     || || ||   
+ |  |  |   |10    ---    15|      |  |  level converter   |     || || ||   
+ |  |  |   |11   |(`)|   14|      |  |                    |     || || ||   
+ |  |  |   |12    ---    13|      |  |                    |     || || ||   
+ |  |  |    ---------------       |  |                    |     \/ \/ \/            
+ |  |  *--------TEENSY-SIGNAL-----*  |                    |                
+ |  |                                |                    |                
+ |  *-----------OE CONTROL-----------*                    |                
+ |                                                        |                
+ *-----------------GND------------------------------------*                
 ```
 
    Connect a sensor using level shifter using Ext Vin for sensor power.<br>
 ```
-:---------------------------------------------------------------------------:
-:                                                                           :
-:                             External Power                                :
-:                               ----------                                  :   
-:                              |      VOUT|>-------7-12V--------------*     :
-: *-------------GND----------->|GND    GND|<--------GND-------------* |     :
-: |                             ----------                          | |     :
-: |                                                                 | |     :
-: |                                                                 | |     :
-: |                                                      *-SIGNAL-* | |     :
-: |                                                      |        | | |     :
-: |                                                      |       _*_*_*__   :
-: |           TEENSY 3.x/LC                              |      /        \  :
-: |          _______________                             |     | DECAGON  | :
-: *-------->|GND |_____| Vin|>------5V-----------------* |     |   5TE    | :
-: |  *-----<|0  -----   AGND|             ----------   | |     |          | :
-: |  |  *-<>|1/TX1   |  3.3V|>---------->|3.3V    5V|<-* |     |          | :
-: |  |  |   |2 |,,,,,|    23|      *---<>|A1      B1|<>--*     |          | :
-: |  |  |   |3  -----     22|      |     |A2      B2|          |          | :
-: |  |  |   |4 |'|        21|      |     |A4      B4|          |          | :
-: |  |  |   |5   ------   20|      |     |A3      B3|           \________/  :
-: |  |  |   |6 |::::::::| 19|      |  *->|OE     GND|<-----*     || || ||   :
-: |  |  |   |7 |::::::::| 18|      |  |   ----------       |     || || ||   :
-: |  |  |   |8 |::::::::| 17|      |  |     TXB0104        |     || || ||   :
-: |  |  |   |9   ------   16|      |  |  bi-directional    |     || || ||   :
-: |  |  |   |10    ---    15|      |  |  level converter   |     || || ||   :
-: |  |  |   |11   |(`)|   14|      |  |                    |     || || ||   :
-: |  |  |   |12    ---    13|      |  |                    |     || || ||   :
-: |  |  |    ---------------       |  |                    |     \/ \/ \/   :         
-: |  |  *--------TEENSY-SIGNAL-----*  |                    |                :
-: |  |                                |                    |                :
-: |  *-----------OE CONTROL-----------*                    |                :
-: |                                                        |                :
-: *-----------------GND------------------------------------*                :
-:                                                                           :
-:---------------------------------------------------------------------------:
+                             External Power                               
+                               ----------                                     
+                              |      VOUT|>-------7-12V--------------*     
+ *-------------GND----------->|GND    GND|<--------GND-------------* |     
+ |                             ----------                          | |     
+ |                                                                 | |     
+ |                                                                 | |     
+ |                                                      *-SIGNAL-* | |     
+ |                                                      |        | | |     
+ |                                                      |       _*_*_*__   
+ |           TEENSY 3.x/LC                              |      /        \  
+ |          _______________                             |     | DECAGON  | 
+ *-------->|GND |_____| Vin|>------5V-----------------* |     |   5TE    | 
+ |  *-----<|0  -----   AGND|             ----------   | |     |          | 
+ |  |  *-<>|1/TX1   |  3.3V|>---------->|3.3V    5V|<-* |     |          | 
+ |  |  |   |2 |,,,,,|    23|      *---<>|A1      B1|<>--*     |          | 
+ |  |  |   |3  -----     22|      |     |A2      B2|          |          | 
+ |  |  |   |4 |'|        21|      |     |A4      B4|          |          | 
+ |  |  |   |5   ------   20|      |     |A3      B3|           \________/  
+ |  |  |   |6 |::::::::| 19|      |  *->|OE     GND|<-----*     || || ||   
+ |  |  |   |7 |::::::::| 18|      |  |   ----------       |     || || ||   
+ |  |  |   |8 |::::::::| 17|      |  |     TXB0104        |     || || ||   
+ |  |  |   |9   ------   16|      |  |  bi-directional    |     || || ||   
+ |  |  |   |10    ---    15|      |  |  level converter   |     || || ||   
+ |  |  |   |11   |(`)|   14|      |  |                    |     || || ||   
+ |  |  |   |12    ---    13|      |  |                    |     || || ||   
+ |  |  |    ---------------       |  |                    |     \/ \/ \/            
+ |  |  *--------TEENSY-SIGNAL-----*  |                    |                
+ |  |                                |                    |                
+ |  *-----------OE CONTROL-----------*                    |                
+ |                                                        |                
+ *-----------------GND------------------------------------*                
 ```
-<h2>Library Usage</h2><br>
-<b>Constructor:</b>
----
+<h1 align="center">Library Usage</h1>
+
+<h5>Constructor:</h5>
 ```c
 SDI12( Stream *port, char address, bool crc = false ) ;
 ```
@@ -244,10 +222,9 @@ SDI12 DECAGON_5TE_30CM( &Serial3, '3', true );
 SDI12 DECAGON_5TE_40CM( &Serial3, '4', true );
 ```
 <br>
-<h3>-----------------------------Functions-------------------------------</h3>
+<h3 align="center">Functions</h3>
 
-<b>isActive:</b>
----
+<h5>isActive:</h5>
 ```c
 //SDI12 (Acknowledge Active) "a!" command.
 int isActive( int address = -1 );
@@ -281,8 +258,7 @@ error = DECAGON_5TE_40CM.isActive( '5' );
 if( error ) Serial.println( "Sensor at address 5 Not Active" );
 ```
 
-<br><b>identification:</b>
----
+<h5>identification:</h5>
 ```c
 // SDI12 (Send Identification) "aI!" command.
 int identification( volatile void *src );
@@ -312,8 +288,7 @@ error = DECAGON_5TE_40CM.identification( buf );
 if( !error ) Serial.println( buf );
 ```
 
-<br><b>queryAddress:</b>
----
+<h5>queryAddress:</h5>
 ```c
 // SDI12 (Address Query) "?!" command.
 /*** Only ONE sensor can on the bus when using this command! ***/
@@ -327,13 +302,12 @@ int address;
 // Only one sensor can be connected to bus at a time. 
 address = DECAGON_5TE_10CM.queryAddress( );
 if(address != -1) {
-    Serial.print( "Sensor Address is " );
-    Serial.println( (char)address )
+Serial.print( "Sensor Address is " );
+Serial.println( (char)address )
 }
 ```
 
-<br><b>changeAddress:</b>
----
+<h5>changeAddress:</h5>
 ```c
 // SDI12 (Change Address) "aAb!" command.
 int changeAddress( uint8_t new_address );
@@ -348,15 +322,14 @@ int address;
 // This address will be updated for any future use of this function.
 address = DECAGON_5TE_10CM.changeAddress( '5' );
 if( address != -1 ) {
-    Serial.print( "New Address is" );
-    Serial.println( (char)address );
+Serial.print( "New Address is" );
+Serial.println( (char)address );
 } else {
-    Serial.println( "Address out of range or command failed" );
+Serial.println( "Address out of range or command failed" );
 }
 ```
 
-<br><b>verification:</b>
----
+<h5>verification:</h5>
 ```c
 // SDI12 (Start Verification) "aV!" command.
 int verification( volatile void *src );
@@ -380,8 +353,7 @@ error = DECAGON_5TE_10CM.returnMeasurement( buf, 0 );
 if ( !error ) Serial.print( buf );
 ```
 
-<br><b>measurement:</b>
----
+<h5>measurement:</h5>
 ```c
 // SDI12 (Start Measurement) command.
 // "aM!", "aMC!" or "aM0...aM9" or "aMC0...aMC9"
@@ -412,11 +384,11 @@ if ( !error ) Serial.print( data );
 // Function to tell sensor to make a measurement.
 // optional additional measurements command.
 /***error = DECAGON_5TE_20CM.measurement( debug, 0 );***/
- error = DECAGON_5TE_20CM.measurement( debug );
- if ( !error ) Serial.print( debug );
- error = DECAGON_5TE_20CM.returnMeasurement( data, 0 );
- if (!error) Serial.print( data );
-   
+error = DECAGON_5TE_20CM.measurement( debug );
+if ( !error ) Serial.print( debug );
+error = DECAGON_5TE_20CM.returnMeasurement( data, 0 );
+if (!error) Serial.print( data );
+
 // Function to tell sensor to make a measurement.
 // optional additional measurements command.
 /***error = DECAGON_5TE_30CM.measurement( debug, 0 );***/
@@ -424,7 +396,7 @@ error = DECAGON_5TE_30CM.measurement( debug );
 if ( !error ) Serial.print( debug );
 error = DECAGON_5TE_30CM.returnMeasurement( data, 0 );
 if ( !error ) Serial.print( data );
-   
+
 // Function to tell sensor to make a measurement.
 // optional additional measurements command.
 /***error = DECAGON_5TE_40CM.measurement( debug, 0 );***/
@@ -434,8 +406,7 @@ error = DECAGON_5TE_40CM.returnMeasurement( data, 0 );
 if ( !error ) Serial.print( data );
 ```
 
-<br><b>concurrent:</b>
----
+<h5>concurrent:</h5>
 ```c
 // SDI12 (Start Concurrent Measurement) command.
 // "aC!","aCC!" or "aC0...aC9" or "aCC0...aCC9"
@@ -455,8 +426,7 @@ error = DECAGON_5TE_40CM.returnMeasurement( data, 0 );
 if ( !error ) Serial.print( data );
 ```
 
-<br><b>continuous:</b>
----
+<h5>continuous:</h5>
 ```c
 // SDI12 (Start Continuous Measurement) command.
 // "aR0!...aR9!" or "aRC0!...aRC9!"
@@ -481,7 +451,7 @@ if ( !error ) Serial.print( data );
 
 ```
 
-<br><b>returnMeasurement:</b>
+<h5>returnMeasurement:</h5>
 ---
 ```c
 // SDI12 (Return Measurement) command.
@@ -497,8 +467,7 @@ Example:
 // Example is provided with 'measurement' function above.
 ```
 
-<br>transparent:
----
+<h5>transparent:</h5>
 ```c
 // SDI12 (Transparent) command. Allows extended SDI12 commands.
 int transparent( const void *command, volatile void *src );
@@ -521,7 +490,6 @@ memset( data, 0, 81 );
 error = DECAGON_5TE_10CM.transparent( cmd, data );
 if ( !error ) Serial.print( data );
 ```
-
 
 [SDI12 Specification]:http://www.sdi-12.org/current%20specification/SDI-12_version1_3%20January%2026,%202013.pdf
 [Vaisala WXT520]:http://www.vaisala.com/en/products/multiweathersensors/Pages/WXT520.aspx
