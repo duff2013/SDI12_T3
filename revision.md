@@ -1,3 +1,6 @@
+><b>Updated (9/7/15 v3.0.1)</b><br>
+* Fixed Properites Catagory warning.<br>
+
 ><b>Updated (03/12/15 v3.0)</b><br>
 *  - Even more stable and more TeensyLC compatible also Concurrent Command is now available. Next update will be for a total non-blocking Concurrent Command.
 

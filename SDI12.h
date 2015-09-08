@@ -1,7 +1,7 @@
 /*
  ||
  || @file 	SDI12.h
- || @version 	3
+ || @version 	3.0.1
  || @author 	Colin Duffy
  || @contact 	cmduffy@engr.psu.edu
  ||
