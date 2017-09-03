@@ -32,7 +32,7 @@ Connect the sensor to Teensy using Teensy's Vin (5V) for sensor power.<br>
    |                                                       |               
    |                                   TEENSY 3.0/LC       |               
    |                                  _______________      |               
-   | *----------------GND----------->|GND |_____| Vin|>----*               
+   | *----------------GND----------->|GND |_____| Vin|<----*               
    | |                               |0  -----   AGND|                     
    | | *--Signal---/\/\/\/\--------<>|1/TX1   |  3.3V|                     
   _|_|_|__            10K            |2 |,,,,,|    23|                     
@@ -57,7 +57,7 @@ Connect the sensor to Teensy using Teensy's Vin (5V) for sensor power.<br>
    |                                                       |                
    |                                    TEENSY 3.1         |               
    |                                  _______________      |               
-   | *----------------GND----------->|GND |_____| Vin|>----*               
+   | *----------------GND----------->|GND |_____| Vin|<----*               
    | |                               |0  -----   AGND|                     
    | | *-------------Signal--------<>|1/TX1   |  3.3V|                     
   _|_|_|__                           |2 |,,,,,|    23|                     
@@ -143,7 +143,7 @@ Connect a sensor using level shifter and Teensy's Vin for sensor power.<br>
 |                                                    | |       _*_*_*__   
 |           TEENSY 3.x/LC                            | |      /        \  
 |          _______________                           | |     | DECAGON  | 
-*-------->|GND |_____| Vin|>------5V-----------------* |     |   5TE    | 
+*-------->|GND |_____| Vin|<------5V-----------------* |     |   5TE    | 
 |  *-----<|0  -----   AGND|             ----------   | |     |          | 
 |  |  *-<>|1/TX1   |  3.3V|>---------->|3.3V    5V|<-* |     |          | 
 |  |  |   |2 |,,,,,|    23|      *---<>|A1      B1|<>--*     |          | 
@@ -179,7 +179,7 @@ Connect a sensor using level shifter using Ext Vin for sensor power.<br>
 |                                                      |       _*_*_*__   
 |           TEENSY 3.x/LC                              |      /        \  
 |          _______________                             |     | DECAGON  | 
-*-------->|GND |_____| Vin|>------5V-----------------* |     |   5TE    | 
+*-------->|GND |_____| Vin|<------5V-----------------* |     |   5TE    | 
 |  *-----<|0  -----   AGND|             ----------   | |     |          | 
 |  |  *-<>|1/TX1   |  3.3V|>---------->|3.3V    5V|<-* |     |          | 
 |  |  |   |2 |,,,,,|    23|      *---<>|A1      B1|<>--*     |          | 
