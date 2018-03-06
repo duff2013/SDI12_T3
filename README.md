@@ -293,13 +293,15 @@ error = DECAGON_5TE_40CM.identification( buf );
 if( !error ) Serial.println( buf );
 ```
 <br>
----
+
 <h5>queryAddress:</h5>
+
 ```c
 // SDI12 (Address Query) "?!" command.
 /*** Only ONE sensor can on the bus when using this command! ***/
 int queryAddress( void );
 ```
+
 Example:
 ```c
 int address;
@@ -313,7 +315,7 @@ Serial.println( (char)address )
 }
 ```
 <br>
----
+
 <h5>changeAddress:</h5>
 
 ```c
