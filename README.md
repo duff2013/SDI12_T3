@@ -203,9 +203,9 @@ Connect a sensor using level shifter using Ext Vin for sensor power.<br>
 <h1 align="center">Library Usage</h1>
 
 <h5>Constructor:</h5>
-```c
-SDI12( Stream *port, char address, bool crc = false ) ;
-```
+
+```SDI12( Stream *port, char address, bool crc = false ) ;```
+
 >1. ```Stream *port``` = One of the Hardware Serial Ports.
 >2. ```char address``` = Sensor Address, must be preprogramed.
 >3. ```bool crc```(optional) = Set 'true' to append CRC to sensor data.
@@ -225,10 +225,12 @@ SDI12 DECAGON_5TE_40CM( &Serial3, '4', true );
 <h3 align="center">Functions</h3>
 
 <h5>isActive:</h5>
-```c
+
+```
 //SDI12 (Acknowledge Active) "a!" command.
 int isActive( int address = -1 );
 ```
+
 >1. ```int address```(optional) = can use other address also.
 
 Example:
@@ -260,10 +262,12 @@ if( error ) Serial.println( "Sensor at address 5 Not Active" );
 <br>
 ---
 <h5>identification:</h5>
+
 ```c
 // SDI12 (Send Identification) "aI!" command.
 int identification( volatile void *src );
 ```
+
 >1. ```(char or uint8_t) *src``` = buffer array you supply to hold returned string.
 
 Example:
@@ -311,10 +315,12 @@ Serial.println( (char)address )
 <br>
 ---
 <h5>changeAddress:</h5>
+
 ```c
 // SDI12 (Change Address) "aAb!" command.
 int changeAddress( uint8_t new_address );
 ```
+
 >1. ```uint8_t new_address``` = address you want to change to.
 
 Example:
@@ -334,10 +340,12 @@ Serial.println( "Address out of range or command failed" );
 <br>
 ---
 <h5>verification:</h5>
+
 ```c
 // SDI12 (Start Verification) "aV!" command.
 int verification( volatile void *src );
 ```
+
 >1. ```(char or uint8_t) *src``` = buffer array you supply to hold returned string.
 
 Example:
@@ -359,12 +367,14 @@ if ( !error ) Serial.print( buf );
 <br>
 ---
 <h5>measurement:</h5>
+
 ```c
 // SDI12 (Start Measurement) command.
 // "aM!", "aMC!" or "aM0...aM9" or "aMC0...aMC9"
 int measurement( int num = -1 ) { uint8_t s[75]; measurement( s, num ); }
 int measurement( volatile void *src, int num = -1 );
 ```
+
 >1. ```(char or uint8_t) *src``` = buffer array you supply to hold acknowledgement string.
 >2. ```int num = -1```(optional) = Additional measurements.
 
@@ -413,11 +423,13 @@ if ( !error ) Serial.print( data );
 <br>
 ---
 <h5>concurrent:</h5>
-```c
+
+```
 // SDI12 (Start Concurrent Measurement) command.
 // "aC!","aCC!" or "aC0...aC9" or "aCC0...aCC9"
 int  concurrent( volatile void *src, int num = -1 );
 ```
+
 >1. ```(char or uint8_t) *src``` = buffer array you supply to hold acknowledgement string.
 >2. ```int num = -1```(optional) = Additional measurements.
 
@@ -434,11 +446,13 @@ if ( !error ) Serial.print( data );
 <br>
 ---
 <h5>continuous:</h5>
+
 ```c
 // SDI12 (Start Continuous Measurement) command.
 // "aR0!...aR9!" or "aRC0!...aRC9!"
 int continuous( volatile void *src, int num = -1 );
 ```
+
 >1. ```(char or uint8_t) *src``` = buffer array you supply to hold returned string.
 >2. ```int num = -1```(optional) = Additional measurements.
 
@@ -459,12 +473,13 @@ if ( !error ) Serial.print( data );
 <br>
 ---
 <h5>returnMeasurement:</h5>
----
+
 ```c
 // SDI12 (Return Measurement) command.
 // "aD!" or "aD0!...aD9!"
 int returnMeasurement( volatile void *src, int num = -1 );
 ```
+
 >1. ```(char or uint8_t) *src``` = buffer array you supply to hold returned string.
 >2. ```int num = -1```(optional) = Additional measurements.
 
@@ -476,10 +491,12 @@ Example:
 <br>
 ---
 <h5>transparent:</h5>
+
 ```c
 // SDI12 (Transparent) command. Allows extended SDI12 commands.
 int transparent( const void *command, volatile void *src );
 ```
+
 >1. ```const (char or uint8_t) *command``` = SDI12 command to send.
 >2. ```(char or uint8_t) *src``` = buffer array you supply to hold returned string.
 
