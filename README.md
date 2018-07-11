@@ -1,6 +1,6 @@
 <h1 align="center">SDI-12</h1>
 
-<h3 align="center">Teensy 3.x/LC SDI-12 Library v3.0.1</h3>
+<h3 align="center">Teensy 3.x/LC SDI-12 Library v3.1.0</h3>
 
 <b>[SDI12 Specification]</b>
 > SDI12 is a single wire serial protocol that uses inverted 5V logic levels, specifically (1200 baud, 7E1) for bi-directional data flow with one Master and many Slaves. This library sets up the Freescale Cortex one-wire protocol for each of its 3 Hardware Serial ports TX pin along with critical timing - Break and Mark signals to wake the sensor bus. This makes effectively 3 separate SDI12 buses that can be used or not. Since SDI12 is Master-Slave, many different types of sensor can share the same bus through the use of unique address for each sensor.<br>

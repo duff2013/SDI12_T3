@@ -1,3 +1,6 @@
+><b>Updated (6/10/18 v3.1.0)</b><br>
+* Now compiles for Teensy 3.6/3.6.<br>
+
 ><b>Updated (9/7/15 v3.0.1)</b><br>
 * Fixed Properites Catagory warning.<br>
 

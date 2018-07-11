@@ -3,7 +3,7 @@
  || @file 		utils.h
  || @version 	2
  || @author 	Colin Duffy
- || @contact 	cmduffy@engr.psu.edu
+ || @contact 	https://github.com/duff2013/SDI12_T3
  || @license
  || | Copyright (c) 2015 Colin Duffy
  || | This library is free software; you can redistribute it and/or
@@ -39,13 +39,13 @@
 
 #define IRQ_PRIORITY        64  // 0 = highest priority, 255 = lowest
 
-#define UART_C3_TXDIR       (uint8_t)0x20
-#define UART_C3_TXINV       (uint8_t)0x10
-#define UART_C3_ORIE        (uint8_t)0x08
-#define UART_C3_FEIE        (uint8_t)0x02
-#define UART_C3_PEIE        (uint8_t)0x01
+//#define UART_C3_TXDIR       (uint8_t)0x20
+//#define UART_C3_TXINV       (uint8_t)0x10
+//#define UART_C3_ORIE        (uint8_t)0x08
+//#define UART_C3_FEIE        (uint8_t)0x02
+//#define UART_C3_PEIE        (uint8_t)0x01
 
-#define UART_S2_RXINV       (uint8_t)0x10
+//#define UART_S2_RXINV       (uint8_t)0x10
 
 #define C2_ENABLE           UART_C2_TE | UART_C2_RE | UART_C2_RIE
 #define C2_TX_ACTIVE		C2_ENABLE | UART_C2_TIE
@@ -74,7 +74,7 @@ void detachInterruptVector( enum IRQ_NUMBER_t irq );
 // --------------------------------------------------------------------------------------------
 #if defined(KINETISK)
     #define ENABLE_UART0 ({                                                             \
-        BITBAND_U32(SIM_SCGC4, SCGC4_UART0_BIT) = 0x01;                                 \
+        SIM_SCGC4 |= SIM_SCGC4_UART0;                                                   \
         CORE_PIN0_CONFIG = PORT_PCR_PE | PORT_PCR_PS | PORT_PCR_PFE | PORT_PCR_MUX(3);  \
         CORE_PIN1_CONFIG = PORT_PCR_DSE | PORT_PCR_SRE | PORT_PCR_MUX(3);               \
         int divisor = BAUD2DIV(1200);                                                   \
@@ -90,10 +90,10 @@ void detachInterruptVector( enum IRQ_NUMBER_t irq );
     })
 
     #define ENABLE_UART1 ({                                                             \
-        BITBAND_U32(SIM_SCGC4, SCGC4_UART1_BIT) = 0x01;                                 \
+        SIM_SCGC4 |= SIM_SCGC4_UART1;                                                   \
         CORE_PIN9_CONFIG = PORT_PCR_PE | PORT_PCR_PS | PORT_PCR_PFE | PORT_PCR_MUX(3);  \
         CORE_PIN10_CONFIG = PORT_PCR_DSE | PORT_PCR_SRE | PORT_PCR_MUX(3);              \
-        int divisor = BAUD2DIV2(1200);                                                   \
+        int divisor = BAUD2DIV2(1200);                                                  \
         UART1_BDH = (divisor >> 13) & 0x1F;                                             \
         UART1_BDL = (divisor >> 5) & 0xFF;                                              \
         UART1_C4 = divisor & 0x1F;                                                      \
@@ -106,7 +106,7 @@ void detachInterruptVector( enum IRQ_NUMBER_t irq );
     })
 
     #define ENABLE_UART2 ({                                                             \
-        BITBAND_U32(SIM_SCGC4, SCGC4_UART2_BIT) = 0x01;                                 \
+        SIM_SCGC4 |= SIM_SCGC4_UART2;                                                   \
         CORE_PIN7_CONFIG = PORT_PCR_PE | PORT_PCR_PS | PORT_PCR_PFE | PORT_PCR_MUX(3);  \
         CORE_PIN8_CONFIG = PORT_PCR_DSE | PORT_PCR_SRE | PORT_PCR_MUX(3);               \
         int divisor = BAUD2DIV3(1200);                                                  \

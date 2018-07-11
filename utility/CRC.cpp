@@ -3,14 +3,14 @@
  || @file 		CRC.h
  || @version 	1
  || @author 	Colin Duffy, Mike Jablonski
- || @contact 	cmduffy@engr.psu.edu
+ || @contact 	https://github.com/duff2013/SDI12_T3
  ||
  || Mike Jablonski
  || NR Systems, Inc.
  || 165 East 500 South
  || River Heights, Utah  84321
  || 435-752-4200
- || nrsys@comcast.net
+ || 
  ||
  || @description
  || | SDI12 CRC library, appends or checks ascii CRC using the algorithm

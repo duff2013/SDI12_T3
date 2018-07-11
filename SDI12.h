@@ -3,7 +3,7 @@
  || @file 	SDI12.h
  || @version 	3.0.1
  || @author 	Colin Duffy
- || @contact 	cmduffy@engr.psu.edu
+ || @contact 	https://github.com/duff2013/SDI12_T3
  ||
  || @description
  || | SDI12 library for Teensy 3.0/3.1.
