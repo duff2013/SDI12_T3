@@ -46,6 +46,7 @@ public:
         RX_PIN( nullptr ),
         SET( nullptr ),
         CLEAR( nullptr ),
+        STATUS_REG( nullptr ),
         PIN_NUM_RX( 0 ),
         PIN_NUM_TX( 0 )
     {
@@ -66,6 +67,7 @@ private:
     volatile uint8_t  SCGC4;
     volatile uint32_t *SET;
     volatile uint32_t *CLEAR;
+    volatile uint8_t  *STATUS_REG;
     volatile uint32_t BITMASK;
     uint8_t           PIN_NUM_RX;
     uint8_t           PIN_NUM_TX;

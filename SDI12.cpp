@@ -105,6 +105,7 @@ void SDI12::init( void ) {
         TX_PIN     = &PORTB_PCR17;
         SET        = &GPIOB_PSOR;
         CLEAR      = &GPIOB_PCOR;
+        STATUS_REG = &UART0_S1;
         BITMASK    = CORE_PIN1_BITMASK;
         //PIN_NUM_RX = 0;
         PIN_NUM_TX = 1;
@@ -120,6 +121,7 @@ void SDI12::init( void ) {
         TX_PIN     = &PORTC_PCR4;
         SET        = &GPIOC_PSOR;
         CLEAR      = &GPIOC_PCOR;
+        STATUS_REG = &UART1_S1;
         BITMASK    = CORE_PIN10_BITMASK;
         //PIN_NUM_RX = 9;
         PIN_NUM_TX = 10;
@@ -130,14 +132,15 @@ void SDI12::init( void ) {
         attachInterruptVector( IRQ_UART2_STATUS, uart2_isr );
         NVIC_ENABLE_IRQ( IRQ_UART2_STATUS );
         RUN_ONCE_END;
-        REG         = &KINETISK_UART2;
-        RX_PIN      = &PORTD_PCR2;
-        TX_PIN      = &PORTD_PCR3;
-        SET         = &GPIOD_PSOR;
-        CLEAR       = &GPIOD_PCOR;
-        BITMASK     = CORE_PIN8_BITMASK;
-        //PIN_NUM_RX  = 7;
-        PIN_NUM_TX  = 8;
+        REG        = &KINETISK_UART2;
+        RX_PIN     = &PORTD_PCR2;
+        TX_PIN     = &PORTD_PCR3;
+        SET        = &GPIOD_PSOR;
+        CLEAR      = &GPIOD_PCOR;
+        STATUS_REG = &UART2_S1;
+        BITMASK    = CORE_PIN8_BITMASK;
+        //PIN_NUM_RX = 7;
+        PIN_NUM_TX = 8;
     }
 }
 
@@ -423,7 +426,7 @@ int SDI12::verification( volatile void *src ) {
     
     do {
         yield( );
-    } while ( !( UART2_S1 & UART_S1_IDLE ) );
+    } while ( !( *STATUS_REG & UART_S1_IDLE ) );
     
     char service_request[10];
     i = 0;
@@ -501,7 +504,7 @@ int SDI12::measurement( volatile void *src, int num ) {
         if ( time >= timeout ) { ioActive = false; return -4; }
         yield( );
     }
-    do { yield( ); } while ( !( UART2_S1 & UART_S1_IDLE ) );
+    do { yield( ); } while ( !( *STATUS_REG & UART_S1_IDLE ) );
     while ( available( ) ) *s++ = read( );
     *s = 0;
     uint8_t * service_request = ( uint8_t * )src;
@@ -638,7 +641,7 @@ int SDI12::transparent( const void *command, volatile void *src ) {
             if ( time >= timeout ) { serviceRequest = true; ioActive = false; return -4; }
             yield( );
         }
-        do { yield( ); } while ( !(UART2_S1 & UART_S1_IDLE) );  // wait for line to go idle
+        do { yield( ); } while ( !(*STATUS_REG & UART_S1_IDLE) );  // wait for line to go idle
         while ( available( ) ) *s++ = read( );                  // read sensor data
     }
     *s = 0;                                                     // null terminate return string
@@ -727,7 +730,7 @@ int SDI12::send_command( const void *cmd, uint8_t count, uint8_t type ) {
             }
             response_timer = 0;                                                 // reset timeout
             while ( !commandResponse && ( response_timer < 1000 ) ) yield( );   // wait for response from sensor
-            do { yield( ); } while ( !( UART2_S1 & UART_S1_IDLE ) );            // wait for i/o to become idle
+            do { yield( ); } while ( !( *STATUS_REG & UART_S1_IDLE ) );            // wait for i/o to become idle
             if ( response_timer >= 1000 ) { return -3; }                        // signal any errors
             break;
         case NON_BLOCKING:
