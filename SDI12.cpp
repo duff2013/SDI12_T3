@@ -325,13 +325,6 @@ int SDI12::changeAddress( const uint8_t new_address ) {
         ioActive = false;
         return -3;
     }
-
-    error = isActive( );
-
-    if ( error ) {
-        ioActive = false;
-        return -4;
-    }
     
     uint8_t command[4];
     command[0] = sensor.address;
